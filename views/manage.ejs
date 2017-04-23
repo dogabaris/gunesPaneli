@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Güneş Paneli Takip Sistemi</title>
+    <link rel="stylesheet" href="/js/stylesheets/style.css">
+    <link rel="stylesheet" href="/js/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/js/jquery-ui-1.11.4/jquery-ui.min.css">
+    <script src="/js/socket.io.js"></script>
+    <script src="/js/jquery-ui-1.11.4/external/jquery/jquery.js"></script>
+    <script src="/js/jquery-ui-1.11.4/jquery-ui.min.js"></script>
+    <script src="/js/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/js/highcharts/js/highcharts.js"></script>
+    <script src="/js/highcharts/js/highcharts-more.js"></script>
+
+
+    <script>
+      var url = window.location.href;
+      if(url.indexOf('manage') == -1) {
+          $('#viewPanel').addClass("active");
+          $('#managePanel').removeClass("active");
+      } else {
+          $('#viewPanel').removeClass("active");
+          $('#managePanel').addClass("active");
+      }
+    </script>
+
+    <script>
+      var socket = io();
+      socket.on('retrievePanelList', function (panelList) {
+          $('#panelTable').find('> tbody > tr').remove();
+          for(var i = 0; i < panelList.length; i++) {
+              addPanelToTable(i, panelList[i]);
+          }
+      });
+      socket.emit('retrievePanelList', 0, true);
+      function addPanelToTable(index, panel) {
+          var row = '<tr>';
+          row += '<th scope="row" style=""><!--' + panel._id + '--></th>';
+          row += '<td>'+panel.macAddr+'</td>';
+          row += '<td>'+panel.ipAddr+'</td>';
+          row += '<td>' + panel.name + '</td>';
+          row += '<td>'+panel.location+'</td>';
+          if(panel.status) {
+              row += '<td>';
+              row += '<span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>';
+              row += '</td>';
+          } else {
+              row += '<td>';
+              row += '<span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>';
+              row += '</td>';
+          }
+          row += '<td>';
+          row += '<button type="button" class="btn btn-warning btn-xs" aria-label="Left Align" id="'+panel._id+'_edit">';
+          row += '<span class="glyphicon glyphicon-edit" aria-hidden="true"></span>';
+          row += '</button>';
+          row += '</td>';
+          row += '<td>';
+          row += '<button type="button" class="btn btn-danger btn-xs" aria-label="Left Align" id="'+panel._id+'_del">';
+          row += '<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>';
+          row += '</button>';
+          row += '</td>';
+          row += '</tr>';
+          $('#panelTable > tbody:last-child').append(row);
+          $('#'+panel._id+'_del').click(function(){
+              removePanel(panel);
+          });
+          $('#'+panel._id+'_edit').click(function(){
+              editPanel(panel);
+          });
+      }
+      function submitForm() {
+          var pName = $('#panelName');
+          var pStatus = $('#panelStatus');
+          var pId = $('#panelId');
+          if (pName.val() == '') {
+              $('.alert').show();
+              return;
+          }
+          var panel         = {};
+          panel.name        = pName.val();
+          panel.status      = pStatus.prop('checked');
+          panel.location    = $('#location').val();
+          panel.macAddr     = $('#macAddr').val();
+          panel.ipAddr      = '-';
+          if(pId.val()=='') {
+              socket.emit('addPanel', panel);
+          } else {
+              panel._id = pId.val();
+              socket.emit('editPanel', panel);
+          }
+          resetForm();
+      }
+      function resetForm() {
+          $('#panelName').val('');
+          $('#panelStatus').prop('checked', false);
+          $('#panelId').val('');
+          $('#macAddr').val('');
+          $('#location').val('');
+      }
+      function editPanel(panel) {
+          $('#panelName').val(panel.name);
+          $('#panelStatus').prop('checked', panel.status);
+          $('#panelId').val(panel._id);
+          $('#location').val(panel.location);
+          $('#macAddr').val(panel.macAddr);
+          $('#manageForm').modal('show');
+      }
+      function removePanel(panel) {
+          socket.emit('removePanel', panel);
+      }
+      $('#alertClose').click(function(){
+          $('.alert').hide();
+      });
+      $('#manageDataCreate').click(function () {
+          manageStatusButton(!$(this).data('status'));
+          if($(this).data('status')) {
+              $(this).data('status', false);
+              socket.emit('stopDataCreate');
+          } else {
+              $(this).data('status', true);
+              socket.emit('startDataCreate');
+          }
+      });
+      var html;
+      function manageStatusButton(status) {
+          /*var button = $('#manageDataCreate');
+          if (!status) {
+              html = '<span class="glyphicon glyphicon-play" aria-hidden="true"></span>';
+              html += '<span> Veri Akışını Başlat</span>';
+              button.html(html);
+          } else {
+              html = '<span class="glyphicon glyphicon-pause" aria-hidden="true"></span>';
+              html += '<span> Veri Akışını Durdur</span>';
+              button.html(html);
+          }*/
+      }
+      socket.on('checkCreationStatus', function (status) {
+          manageStatusButton(status);
+          $('#manageDataCreate').data('status', status);
+      });
+      socket.emit('checkCreationStatus');
+    </script>
+
+
+  </head>
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header"><a href="/" class="navbar-brand">
+            Güneş Paneli Takip Sistemi
+            </a></div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li id="viewPanel" class="active"><a href="/">Panel Takibi</a></li>
+            <li id="managePanel"><a href="manage">
+                Panel Yönetimi
+                </a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+<div class="jumbotron">
+  <div style="margin-bottom:20px;" class="container">
+    <h1>Panel Yönetimi</h1>
+    <p>
+      Bu sayfadan güneş panellerini listeleyebilirsiniz. Sayfadaki listeden panel ekleyip çıkarabilir
+      veya panelin takibini bırakabilirsiniz.
+    </p><a id="manageDataCreate" href="#" role="button" style="display:none;" class="btn btn-primary"><span aria-hidden="true" class="glyphicon glyphicon-play"></span><span> Veri Akışını Başlat</span></a>
+  </div>
+</div>
+<div class="container">
+  <div role="alert" style="display:none" class="alert alert-danger alert-dismissible">
+    <button type="button" id="alertClose" aria-label="Close" class="close"><span aria-hidden="true">&times;</span></button><strong>Uyarı!</strong><span>Panel adı boş bırakılamaz.</span>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <button type="button" data-toggle="modal" data-target="#manageForm" class="btn btn-primary btn-xs"><span aria-hidden="true" class="glyphicon glyphicon-plus"></span><span> Panel Ekle</span></button>
+    </div>
+    <table id="panelTable" class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Mac Adresi</th>
+          <th>İp Adresi</th>
+          <th>Panel Adı</th>
+          <th>Lokasyon</th>
+          <th style="width:62px;">Durum</th>
+          <th style="width:62px;">Düzenle</th>
+          <th style="width:62px;">Sil</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+<div id="manageForm" tabindex="-1" role="dialog" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-dismiss="modal" class="close">&times;</button>
+        <h4 class="modal-title">Panel Ekle / Düzenle</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+          <input type="hidden" id="panelId" value=""/>
+          <div class="form-group">
+            <label for="macAddr">Mac Adresi</label>
+            <input type="text" id="macAddr" placeholder="Mac Adresi Girin" class="form-control"/>
+          </div>
+          <div class="form-group">
+            <label for="panelName">Panel Adı</label>
+            <input type="text" id="panelName" placeholder="Panel Adı Girin" class="form-control"/>
+          </div>
+          <div class="form-group">
+            <label for="location">Lokasyon</label>
+            <input type="text" id="location" placeholder="Lokasyon Bilgisi Girin" class="form-control"/>
+          </div>
+          <div class="form-group">
+            <label>Durum (Aktif / Pasif)</label>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" id="panelStatus"/>
+              </label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" data-dismiss="modal" onclick="resetForm()" class="btn btn-default">İptal</button>
+        <button type="button" data-dismiss="modal" onclick="submitForm()" class="btn btn-primary">Tamam</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <footer class="footer">
+    <div class="container">
+      <p class="text-muted">
+        &copy; Kocaeli Üniversitesi Bilgisayar Mühendisliği 2016
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

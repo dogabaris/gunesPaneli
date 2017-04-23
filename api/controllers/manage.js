@@ -1,0 +1,352 @@
+module.exports = {
+
+  manageRender:function (req, res) {
+    var events = require('events');
+    var socket = req.socket;
+    var io = sails.io;
+
+
+    //db
+    //var Panel = mongoose.model('Panel');
+    //var PanelData = mongoose.model('PanelData');
+
+    /*
+    router.get('/veri_kaydet', function (req, res, next) {
+
+        if((req.query.panelId).length > 3){
+
+            var newPanelData = new PanelData({
+                panelId: req.query.panelId,
+                current: req.query.akim,
+                voltage: req.query.gerilim,
+                light: 0,
+                temperature: req.query.sicaklik,
+                moisture: req.query.nem,
+                date: new Date()
+            });
+
+            newPanelData.save(function(err){
+                if(err) {
+                    console.error(err);
+                }
+            });
+
+            io.emit('retrievePanelData', newPanelData);
+
+            res.render('OK');
+        }else{
+            res.render('error',{message: 'parametreler eksik.',error:{status:'500', stack:'ee'}});
+        }
+        //res.render('manage', {message: ''});
+    });
+    */
+    //event
+    var manager = new events.EventEmitter();
+    var creationStatus = false;
+    var sendPanelData = null;
+
+    var pDM = new function () {
+        this.panelMap = {};
+        this.timer = '';
+
+        this.setPanelMap = function(panelList){
+            this.panelMap = {};
+
+            for(var i = 0; i < panelList.length; i++) {
+                if(!panelList[i].status) continue;
+
+                this.panelMap[panelList[i]._id] = panelList[i].status;
+            }
+        };
+
+        this.managePanel = function(panel){
+            this.panelMap[panel._id] = panel.status;
+        };
+
+        this.removePanel = function(panel){
+            this.panelMap[panel._id] = undefined;
+        };
+
+        /*this.startDataCreate = function() {
+            var me = this;
+            this.timer = setInterval(function(){
+                for (key in me.panelMap) {
+                    if (me.panelMap.hasOwnProperty(key)
+                        && me.panelMap[key]) {
+
+                        var newPanelData = new PanelData({
+                            panelId: key,
+                            current: parseInt(Math.random()*1000),
+                            voltage: parseInt(Math.random()*1000),
+                            light: parseInt(Math.random()*100),
+                            temperature: parseInt(Math.random()*100),
+                            moisture: parseInt(Math.random()*100),
+                            date: new Date()
+                        });
+
+                        newPanelData.save(function(err){
+                            if(err) {
+                                console.error(err);
+                            }
+                        });
+
+                        io.emit('retrievePanelData', newPanelData);
+                    }
+                }
+            }, 500);
+
+            creationStatus = true;
+        };*/
+
+        this.stopDataCreate = function() {
+            clearInterval(this.timer);
+
+            creationStatus = false;
+        };
+    };
+
+    /*
+    function getNow() {
+        var d = new Date();
+
+        return new Date(
+            (d.getTime()) +
+            (d.getTimezoneOffset() * 60000) +
+            (3600000 * 5)
+        );
+    }
+    */
+
+    manager.on('setPanelMap', pDM.setPanelMap);
+    manager.on('managePanel', pDM.managePanel);
+    manager.on('removePanel', pDM.removePanel);
+    //manager.on('startDataCreate', pDM.startDataCreate);
+    manager.on('stopDataCreate', pDM.stopDataCreate);
+
+    //socket
+    io.on('connection', function (socket) {
+
+        socket.on('retrievePanelList', function(page, setMap) {
+            sendPanelList(page, setMap);
+        });
+
+        socket.on('addPanelData', function(data) {
+            var newPanelData = new PanelData({
+                panelId: data.id,
+                akim: data.current,
+                gerilim: data.voltage,
+                sicaklik: data.temperature,
+                nem: data.moisture,
+                date: data.date
+            });
+
+
+            newPanelData.save(function(err){
+                if(err) {
+                    console.error(err);
+                }
+            });
+        });
+
+        socket.on('addPanel', function(panel) {
+            var newPanel = new Panel(panel);
+
+
+            newPanel.save(function(err){
+                if(err) {
+                    console.error(err);
+                } else {
+                    manager.emit('managePanel', newPanel);
+                }
+
+                sendPanelList();
+            });
+        });
+
+        socket.on('editPanel', function(panel) {
+            console.log(panel);
+
+
+            Panel.findById(panel._id, function(err, p){
+                if(err) {
+                    console.error(err);
+                } else {
+                    p.name      = panel.name;
+                    p.status    = panel.status;
+                    p.macAddr   = panel.macAddr;
+                    p.location  = panel.location;
+                    p.ipAddr    = '-';
+
+                    p.save(function(err){
+                        if(err) {
+                            console.error(err);
+                        } else {
+                            manager.emit('managePanel', p);
+                        }
+
+                        sendPanelList();
+                    });
+                }
+            });
+        });
+
+        socket.on('removePanel', function(panel) {
+
+            Panel.find({_id:panel._id}).remove(function(err){
+                if(err) {
+                    console.error(err);
+                } else {
+                    PanelData.find({panelId:panel._id}).remove(function(err){
+                        if(err) {
+                            console.error(err);
+                        }
+                    });
+
+                    manager.emit('removePanel', panel);
+                }
+
+                sendPanelList();
+            });
+        });
+
+        /*socket.on('startDataCreate', function(){
+            manager.emit('startDataCreate');
+        });*/
+
+        socket.on('stopDataCreate', function(){
+            manager.emit('stopDataCreate');
+        });
+
+        socket.on('checkCreationStatus', function(){
+            io.emit('checkCreationStatus', creationStatus);
+        });
+
+        function sendPanelList(page, addToManager) {
+            if(!page) {
+                page = 1;
+            }
+
+            Panel.find({}, function(err, panels) {
+                if(err) {
+                    console.error(err);
+                }
+
+                io.emit('retrievePanelList', !err ? panels : []);
+
+                if(addToManager) {
+                    manager.emit('setPanelMap', !err ? panels : []);
+                }
+            });
+        }
+
+        /*
+        * Bu değişken panellerin mac adresiyle panel_id değerlerini tutuyor.
+        * {macAddr: panelId, macAddr: panelId}   formatında tutuluyor.
+        * kayıtlar dinamik olarak ekleniyor.
+        * güneş panelinden ilk kez veri geldiğinde panelin mac adresinden veritabanından panel idsini bulup buraya ekleniyor
+        * */
+        var macToPanelId = {};
+
+        socket.on('verileriKaydetDagit', function(veriler){
+
+            if(veriler.secKey != (veriler.akim+''+veriler.gerilim+''+veriler.sicaklik+''+veriler.nem)){
+
+                console.log('hatali gonderim!!');
+
+            }else{
+
+                /* Eğer mac adresi herhangi bir panelid le eşleşmiyorsa veritabanından panelidyi kontrol edip macToPanelId dizisine değeri tanımlıyor*/
+                if(!macToPanelId[veriler.macAddr]){
+
+                    Panel.findOne({macAddr: veriler.macAddr}, function(err, res){
+
+                        if(err) {
+                            console.error(err);
+                        } else {
+                            macToPanelId[veriler.macAddr] = res._id;
+                            console.log(veriler.macAddr+' mac adresi ' + res._id + ' panelId\'si ile eşleştirildi.');
+                        }
+                    });
+
+                }else{
+
+                    var newPanelData = new PanelData({
+                        panelId     : macToPanelId[veriler.macAddr], //veriler.panelId,
+                        akim        : veriler.akim,
+                        gerilim     : veriler.gerilim,
+                        sicaklik    : veriler.sicaklik,
+                        nem         : veriler.nem,
+                        date        : new Date()
+                    });
+                    newPanelData.save(function(err){
+                        if(err) {
+                            console.error(err);
+                        }
+                    });
+                    io.emit('retrievePanelData', newPanelData);
+                }
+
+            }
+        });
+
+
+        socket.on('ipAdresiGuncelle',function(panel){
+            Panel.findOne({macAddr: panel.macAddr}, function(err, res){
+                if(err) {
+                    console.error(err);
+                } else {
+
+                    res.ipAddr = panel.ipAddr;
+
+                    res.save(function (err) {
+                        if(err) {
+                            console.error('ERROR!');
+                        }else{
+                            console.error(panel.macAddr+' mac adresi '+panel.ipAddr+' ip\'si ile eşleştirildi.');
+                        }
+                    });
+                }
+            });
+        });
+
+
+
+        socket.on('allDataShow', function(panel){
+
+            //console.log(panel);
+
+            PanelData.aggregate({
+                $match: {
+                    panelId: mongoose.Types.ObjectId(panel)
+                }
+            })
+                .group({
+                    _id: {
+                        month: { $month: "$date" },
+                        year: { $year: "$date" }
+                    },
+                    ortAkim: {$avg: '$akim'},
+                    ortGerilim: {$avg: '$gerilim'},
+                    ortSicaklik: {$avg: '$sicaklik'},
+                    totalNem: {$sum: '$nem'},
+                })
+                //.sort("-date")
+                .exec(function (err, ret) {
+                    //console.log(ret);
+
+                    io.emit('allShowDataListen', ret);
+                });
+
+
+
+
+        });
+
+
+
+
+    });
+
+    return router;
+  },
+};
