@@ -25,6 +25,7 @@
     "include-all": "^1.0.0",
     "jquery": "latest",
     "jsdom": "latest",
+    "moment": "^2.18.1",
     "mongodb": "~2.0",
     "morgan": "~1.6.1",
     "rc": "1.0.1",

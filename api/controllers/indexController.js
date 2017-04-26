@@ -3,6 +3,7 @@ module.exports = {
   indexRender:function (req, res) {
     var socket = req.socket;
     var io = sails.io;
+    var events = require('events');
 
     //db
     //var Panel = mongoose.model('Panel');
@@ -30,6 +31,8 @@ module.exports = {
             }, callBackForWithDate).sort({date: 1});
         });
     });
+
+    console.log('rendera kadar çalışıyor');
 
     res.render('homepage');
   },

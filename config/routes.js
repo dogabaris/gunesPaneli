@@ -32,8 +32,8 @@ module.exports.routes = {
   //'post /login': 'UserController.login',
   //'post /signup': 'UserController.signup',
   //'/logout': 'UserController.logout',
-  'get /': 'index.indexRender',
-  'get /manage': 'manage.manageRender',
+  '/': 'indexController.indexRender',
+  '/manage': 'manageController.manageRender',
   //'post /home/new': 'UserController.new',
   //'post /home/update': 'UserController.update'
 

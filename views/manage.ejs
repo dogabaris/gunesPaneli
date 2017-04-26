@@ -12,18 +12,6 @@
     <script src="/js/highcharts/js/highcharts.js"></script>
     <script src="/js/highcharts/js/highcharts-more.js"></script>
 
-
-    <script>
-      var url = window.location.href;
-      if(url.indexOf('manage') == -1) {
-          $('#viewPanel').addClass("active");
-          $('#managePanel').removeClass("active");
-      } else {
-          $('#viewPanel').removeClass("active");
-          $('#managePanel').addClass("active");
-      }
-    </script>
-
     <script>
       var socket = io();
       socket.on('retrievePanelList', function (panelList) {
@@ -152,8 +140,8 @@
             </a></div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li id="viewPanel" class="active"><a href="/">Panel Takibi</a></li>
-            <li id="managePanel"><a href="manage">
+            <li id="viewPanel" ><a href="/">Panel Takibi</a></li>
+            <li id="managePanel" class="active"><a href="manage">
                 Panel Yönetimi
                 </a></li>
           </ul>
