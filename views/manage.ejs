@@ -20,13 +20,15 @@
               addPanelToTable(i, panelList[i]);
           }
       });
+
       socket.emit('retrievePanelList', 0, true);
+
       function addPanelToTable(index, panel) {
           var row = '<tr>';
-          row += '<th scope="row" style=""><!--' + panel._id + '--></th>';
+          row += '<th scope="row" style="">' + panel.id + '</th>';
           row += '<td>'+panel.macAddr+'</td>';
           row += '<td>'+panel.ipAddr+'</td>';
-          row += '<td>' + panel.name + '</td>';
+          row += '<td>'+panel.name  + '</td>';
           row += '<td>'+panel.location+'</td>';
           if(panel.status) {
               row += '<td>';
@@ -49,10 +51,10 @@
           row += '</td>';
           row += '</tr>';
           $('#panelTable > tbody:last-child').append(row);
-          $('#'+panel._id+'_del').click(function(){
+          $('#'+panel.id+'_del').click(function(){
               removePanel(panel);
           });
-          $('#'+panel._id+'_edit').click(function(){
+          $('#'+panel.id+'_edit').click(function(){
               editPanel(panel);
           });
       }
@@ -88,7 +90,7 @@
       function editPanel(panel) {
           $('#panelName').val(panel.name);
           $('#panelStatus').prop('checked', panel.status);
-          $('#panelId').val(panel._id);
+          $('#panelId').val(panel.id);
           $('#location').val(panel.location);
           $('#macAddr').val(panel.macAddr);
           $('#manageForm').modal('show');

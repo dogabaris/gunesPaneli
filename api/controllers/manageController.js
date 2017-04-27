@@ -322,18 +322,22 @@ manageRender:function (req, res) {
         socket.on('allDataShow', function(panel){
 
             //console.log(panel);
-            PanelData.native(function(err, panelCollection) {//SAILS AGGREGATE KULLANIMI İÇİN
+            PanelData.native(function(err, panelCollection) {//SAILSTE AGGREGATE KULLANIMI İÇİN
             if (err) return res.serverError(err);//hata döndürür
 
-            /*collection.find({}, {
-              name: true
-            }).toArray(function (err, results) {
+            /*Pet.native(function(err, collection) {
               if (err) return res.serverError(err);
-              return res.ok(results);
+
+              collection.find({}, {
+                name: true
+              }).toArray(function (err, results) {
+                if (err) return res.serverError(err);
+                return res.ok(results);
+              });
             });*/
 
             panelCollection.aggregate({
-                match: {
+                $match: {
                     panelId: panel
                 }
             })
@@ -349,15 +353,13 @@ manageRender:function (req, res) {
                 })
                 //.sort("-date")
                 .toArray(function (err, ret) {
-                    //console.log(ret);
-                    if (err) return res.serverError(err);
+                  //console.log(ret);
+                  if (err) return res.serverError(err);
 
-                    io.emit('allShowDataListen', ret);
-                });
-
+                  io.emit('allShowDataListen', ret);
               });
 
-
+            });
 
         });
 

@@ -13,7 +13,7 @@
     <script src="/js/bootstrap/js/bootstrap.min.js"></script>
     <script src="/js/highcharts/js/highcharts.js"></script>
     <script src="/js/highcharts/js/highcharts-more.js"></script>
-    <script src="/js/bootstrap-datepicker.min.js"></script>
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -102,291 +102,369 @@
 
 
   <script>
-    var chart = null;
-    var selectedPanelId = null;
-    var showCurrent = true;
-    var seriesList = ['akim', 'gerilim', 'sicaklik', 'nem'];
-    var activeSeries = 'current';
-    var Series = {akim:{series: 0}, gerilim: {series: 1}, sicaklik: {series: 2}, nem: {series: 3}};
-    var dataListOfTheHistorical = [];
-    var socket = io();
-    /* Panelleri bu fonksiyon listeliyor. */
-    socket.on('retrievePanelList', function (PanelList) {
-        $('#panelTable').find('> tbody > tr').remove();
-        for (var i = 0; i < PanelList.length; i++) {
-            if (PanelList[i].status) {
-                addPanelToTable(i, PanelList[i]);
-            }
-        }
-    });
-    socket.emit('retrievePanelList', 0, false);
-    socket.on('retrievePanelData', function (panelData) {
-        if (selectedPanelId == null) return false;
-        if (selectedPanelId != PanelData.panelId) return false;
-        if (!showCurrent) return false;
-        if (!chart) {
-            chart = getChart();
-        }
-        console.log(panelData);
-        if (chart) {
-            updateChartWithCurrentData(panelData);
-        }
-    });
-    socket.on('addPanelDataList', function(dataList) {
-        dataListOfTheHistorical = dataList;
-        updateChartWithHistoricalData();
-    });
-    /* Panelleri tablo şeklinde ekranda gösteriyor. */
-    function addPanelToTable(index, Panel) {
-        var row = '<tr>';
-        row += '<th scope="row">' + (index + 1) + '</th>';
-        row += '<td>' + Panel.name + '</td>';
-        row += '<td>';
-        row += '<button type="button" class="anlik btn btn-default btn-xs" aria-label="Left Align" id="' + Panel._id + '_show">';
-        row += '<span class="glyphicon glyphicon-eye-close" aria-hidden="true" id="' + Panel._id + '_glyph"></span>';
-        row += '</button>';
-        row += '<button type="button" class="gecmis btn btn-default btn-xs gecmis-'+Panel._id+'" onClick="allDataShow(\'' + Panel._id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-signal"></span></button></td>';
-        row += '</tr>';
-        $('#panelTable').find('> tbody:last-child').append(row);
-        $('#' + Panel._id + '_show').click(function () {
-            showPanelDetail(Panel);
-        });
-    }
-    /* Verileri gösterilecek panelleri seçiyoruz */
-    function showPanelDetail(Panel) {
-        clearChart();
-        $('#panelTable').find('button.anlik').removeClass('btn-success').addClass('btn-default');
-        $('#' + Panel._id + '_show').removeClass('btn-default').addClass('btn-success');
-        $('#panelTable').find('button.anlik span').removeClass('glyphicon-eye-open').addClass('glyphicon-eye-close');
-        $('#' + Panel._id + '_glyph').removeClass('glyphicon-eye-close').addClass('glyphicon-eye-open');
-        selectedPanelId = Panel._id;
-        if(!showCurrent) {
-            var selectedDate = new Date($('#datepicker').datepicker( "getDate" ));
-            var nextDay = addDays(selectedDate, 1);
-            socket.emit('retrievePanelDataWithDate', selectedPanelId, selectedDate, nextDay);
-        }
-    }
-    function clearChart() {
-        $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
-        $('#chartDiv').css('display', 'block');
-        $('#chartTitle').css('display','block');
-        $('#chartOldDataDiv').css('display', 'none');
-        if (!chart) {
-            chart = getChart();
-        }
-        if (chart) {
-            var series = chart.series[0];
-            series.setData([], true, true, true);
-        }
-    }
-    function getChart() {
-        return Highcharts.charts[0];
-    }
-    function updateChartWithCurrentData(PanelData) {
-        var x = (new Date(PanelData.date)).getTime();
-        var pointArr;
-        if (chart.series[0].data.length == 0) {
-            for (key in Series) {
-                pointArr = [];
-                pointArr.push([x, PanelData[key]]);
-                chart.series[Series[key].series].setData(pointArr, true, true, true);
-            }
-        }else if (chart.series[0].data.length <= 150) {
-            for (key in Series) {
-                chart.series[Series[key].series].addPoint([x, PanelData[key]], true, false);
-            }
-        } else {
-            for (key in Series) {
-                chart.series[Series[key].series].addPoint([x, PanelData[key]], true, true);
-            }
-        }
-    }
-    function updateChartWithHistoricalData() {
-        var series = chart.series[0];
-        var pointArr = [];
-        for(var i = 0; i < dataListOfTheHistorical.length; i++) {
-            var PanelData = dataListOfTheHistorical[i];
-            var x = (new Date(PanelData.date)).getTime();
-            var y = PanelData[activeSeries];
-            pointArr.push([x, y]);
-        }
-        series.setData(pointArr, true, false, true);
-    }
-    /*function changeSeries(id) {
-        for(var i = 0; i < seriesList.length; i++) {
-            var btn = $('#' + seriesList[i]);
-            btn.removeClass('btn-primary').removeClass('btn-default');
-            btn.addClass('btn-default');
-        }
-        var clickedBtn = $('#' + id);
-        clickedBtn.removeClass('btn-primary').removeClass('btn-default');
-        clickedBtn.addClass('btn-primary');
-        activeSeries = id;
-        Series[id].active = (Series[id].active + 1) % 2;
-        clearChart();
-        if(!showCurrent) {
-            updateChartWithHistoricalData();
-        }
-    }*/
-    function getToday() {
-        var today = new Date();
-        var dd = today.getDate();
-        var mm = today.getMonth() + 1; //January is 0!
-        var yyyy = today.getFullYear();
-        if (dd < 10) {
-            dd = '0' + dd
-        }
-        if (mm < 10) {
-            mm = '0' + mm
-        }
-        return mm + '/' + dd + '/' + yyyy;
-    }
-    function addDays(date, days) {
-        var result = new Date(date);
-        result.setDate(date.getDate() + days);
-        return result;
-    }
-    $('#chartDiv').highcharts({
-        chart: {
-            type: 'spline',
-            animation: Highcharts.svg,
-            ignoreHiddenSeries: false,
-            height: 400
-        },
-        title: {text: ''},
-        xAxis: {type: 'datetime'},
-        yAxis: {title: {text: 'Değer'}},
-        plotOptions: {spline: {lineWidth: 3, marker: {enabled: false},}},
-        tooltip: {
-            formatter: function () {
-                return 'Tarih : '+Highcharts.dateFormat('%d-%m-%Y %H:%M:%S', this.x) + '<br/>'
-                        + 'Değer: ' + Highcharts.numberFormat(this.y, 2);
-            }
-        },
-        series: [{
-            name: 'Akım',
-            visible: true,
-            data: []
-        }, {
-            name: 'Gerilim',
-            visible: false,
-            data: []
-        }, {
-            name: 'Sıcaklık',
-            visible: false,
-            data: []
-        }, {
-            name: 'Nem',
-            visible: false,
-            data: []
-        }],
-        legend: {
-            enabled: true
-        }
-    });
-    /* Veriler anlık görüntülenmek isteniyorsa bu fonksiyon çağırılıyor. */
-    $.datepicker._gotoToday = function() {
-        clearChart();
-        var chartTitle = document.getElementById('chartTitle');
-        chartTitle.innerHTML = 'Son 5 Dakika';
-        showCurrent = true;
-    }
-    /* Geçmişe dönük kayıtlar görüntülenmek isteniyorsa bu fonk. çağırılıyor. */
-    $('#datepicker').datepicker({
-        maxDate: 0,
-        currentText: 'Anlık Durum',
-        showButtonPanel: true,
-        onSelect: function (dateText) {
-            if (selectedPanelId != null) {
-                clearChart();
-                var chartTitle = document.getElementById('chartTitle');
-                showCurrent = false;
-                var selectedDate = new Date(dateText);
-                var nextDay = addDays(selectedDate, 1);
-                chartTitle.innerHTML = $.datepicker.formatDate('dd.mm.yy', selectedDate);
-                socket.emit('retrievePanelDataWithDate', selectedPanelId, selectedDate, nextDay);
-            }
-        }
-    });
-    function allDataShow(panelId) {
-        $('#panelTable').find('button.anlik').removeClass('btn-success').addClass('btn-default');
-        $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
-        $('button.gecmis-'+panelId).removeClass('btn-default').addClass('btn-success');
-        $('#chartTitle').css('display','none');
-        $('#chartDiv').css('display','none');
-        $('#chartOldDataDiv').css('display','block');
-        socket.emit('allDataShow', panelId, false);
-    }
-    socket.on('allShowDataListen', function (retData) {
-        //console.log(retData);
-        var chartData = [];
-        for (var i in retData) {
-            //console.log(retData[i]);
-            chartData[i] = {
-                name: retData[i]._id.month + '-' + retData[i]._id.year,
-                y: retData[i].ortAkim,
-                drilldown: retData[i]._id.month + '-' + retData[i]._id.year
-            };
-        }
-        console.log(chartData);
-        $('#chartOldDataDiv').highcharts({
-            chart: {type: 'column'},
-            title: {text: 'Panelinin Ortalama Verileri'},
-            subtitle: {text: 'Aya ait ortalama günlük verileri görmek için üzerine tıklayın.'},
-            xAxis: {type: 'category'},
-            yAxis: {
-                title: {
-                    text: 'Üretilen toplam enerji miktarı'
-                }
-            },
-            legend: {
-                enabled: false
-            },
-            plotOptions: {
-                series: {
-                    borderWidth: 0,
-                    dataLabels: {
-                        enabled: true,
-                        format: '{point.y:.1f} kW/saat'
-                    }
-                }
-            },
-            tooltip: {
-                headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-                pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f} kW/saat</b><br/>'
-            },
-            series: [{
-                name: 'Ortalama Veriler',
-                colorByPoint: true,
-                data: chartData
-            }],
-            drilldown: {
-                series: [{
-                    name: '2-2017',
-                    id: '2-2017',
-                    data: [
-                        [
-                            'v11.0',
-                            24.13
-                        ],
-                        [
-                            'v8.0',
-                            17.2
-                        ],
-                        [
-                            'v9.0',
-                            8.11
-                        ],
-                        [
-                            'v10.0',
-                            5.33
-                        ]
-                    ]
-                }]
-            }
-        });
-    });
+  var chart = null;
+  var selectedPanelId = null;
+  var showCurrent = true;
+  var seriesList = ['akim', 'gerilim', 'sicaklik', 'nem'];
+  var activeSeries = 'current';
+  var Series = {akim:{series: 0}, gerilim: {series: 1}, sicaklik: {series: 2}, nem: {series: 3}};
+  var dataListOfTheHistorical = [];
 
-  </script>
+  var socket = io();
+
+  /* Panelleri bu fonksiyon listeliyor. */
+  socket.on('retrievePanelList', function (panelList) {
+      $('#panelTable').find('> tbody > tr').remove();
+
+      for (var i = 0; i < panelList.length; i++) {
+          if (panelList[i].status) {
+
+              addPanelToTable(i, panelList[i]);
+          }
+      }
+  });
+
+
+  socket.emit('retrievePanelList', 0, false);
+
+
+  socket.on('retrievePanelData', function (panelData) {
+      if (selectedPanelId == null) return false;
+      if (selectedPanelId != panelData.panelId) return false;
+      if (!showCurrent) return false;
+
+      if (!chart) {
+          chart = getChart();
+      }
+      console.log(panelData);
+      if (chart) {
+          updateChartWithCurrentData(panelData);
+      }
+  });
+
+  socket.on('addPanelDataList', function(dataList) {
+      dataListOfTheHistorical = dataList;
+
+      updateChartWithHistoricalData();
+  });
+
+  /* Panelleri tablo şeklinde ekranda gösteriyor. */
+  function addPanelToTable(index, panel) {
+
+      var row = '<tr>';
+      row += '<th scope="row">' + (index + 1) + '</th>';
+      row += '<td>' + panel.name + '</td>';
+      row += '<td>';
+      row += '<button type="button" class="anlik btn btn-default btn-xs" aria-label="Left Align" id="' + panel.id + '_show">';
+      row += '<span class="glyphicon glyphicon-eye-close" aria-hidden="true" id="' + panel.id + '_glyph"></span>';
+      row += '</button>';
+      row += '<button type="button" class="gecmis btn btn-default btn-xs gecmis-'+panel.id+'" onClick="allDataShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-signal"></span></button></td>';
+      row += '</tr>';
+      $('#panelTable').find('> tbody:last-child').append(row);
+      $('#' + panel.id + '_show').click(function () {
+          showPanelDetail(panel);
+      });
+  }
+
+  /* Verileri gösterilecek panelleri seçiyoruz */
+  function showPanelDetail(panel) {
+      clearChart();
+      $('#panelTable').find('button.anlik').removeClass('btn-success').addClass('btn-default');
+      $('#' + panel.id + '_show').removeClass('btn-default').addClass('btn-success');
+
+      $('#panelTable').find('button.anlik span').removeClass('glyphicon-eye-open').addClass('glyphicon-eye-close');
+      $('#' + panel.id + '_glyph').removeClass('glyphicon-eye-close').addClass('glyphicon-eye-open');
+
+      selectedPanelId = panel.id;
+
+      if(!showCurrent) {
+          var selectedDate = new Date($('#datepicker').datepicker( "getDate" ));
+          var nextDay = addDays(selectedDate, 1);
+
+          socket.emit('retrievePanelDataWithDate', selectedPanelId,
+                  selectedDate, nextDay);
+      }
+  }
+
+  function clearChart() {
+
+      $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
+
+      $('#chartDiv').css('display', 'block');
+      $('#chartTitle').css('display','block');
+      $('#chartOldDataDiv').css('display', 'none');
+
+      if (!chart) {
+          chart = getChart();
+      }
+
+      if (chart) {
+          var series = chart.series[0];
+          series.setData([], true, true, true);
+      }
+  }
+
+  function getChart() {
+      return Highcharts.charts[0];
+  }
+
+  function updateChartWithCurrentData(panelData) {
+      var x = (new Date(panelData.date)).getTime();
+
+      var pointArr;
+
+      if (chart.series[0].data.length == 0) {
+
+          for (key in Series) {
+              pointArr = [];
+              pointArr.push([x, panelData[key]]);
+              chart.series[Series[key].series].setData(pointArr, true, true, true);
+          }
+
+      }else if (chart.series[0].data.length <= 150) {
+          for (key in Series) {
+              chart.series[Series[key].series].addPoint([x, panelData[key]], true, false);
+          }
+      } else {
+          for (key in Series) {
+              chart.series[Series[key].series].addPoint([x, panelData[key]], true, true);
+          }
+      }
+  }
+
+  function updateChartWithHistoricalData() {
+      var series = chart.series[0];
+      var pointArr = [];
+
+      for(var i = 0; i < dataListOfTheHistorical.length; i++) {
+          var panelData = dataListOfTheHistorical[i];
+
+          var x = (new Date(panelData.date)).getTime();
+          var y = panelData[activeSeries];
+          pointArr.push([x, y]);
+      }
+
+      series.setData(pointArr, true, false, true);
+  }
+
+  /*function changeSeries(id) {
+
+      for(var i = 0; i < seriesList.length; i++) {
+          var btn = $('#' + seriesList[i]);
+          btn.removeClass('btn-primary').removeClass('btn-default');
+          btn.addClass('btn-default');
+      }
+
+      var clickedBtn = $('#' + id);
+      clickedBtn.removeClass('btn-primary').removeClass('btn-default');
+      clickedBtn.addClass('btn-primary');
+
+      activeSeries = id;
+
+      Series[id].active = (Series[id].active + 1) % 2;
+
+      clearChart();
+
+      if(!showCurrent) {
+          updateChartWithHistoricalData();
+      }
+  }*/
+
+  function getToday() {
+      var today = new Date();
+      var dd = today.getDate();
+      var mm = today.getMonth() + 1; //January is 0!
+      var yyyy = today.getFullYear();
+      if (dd < 10) {
+          dd = '0' + dd
+      }
+      if (mm < 10) {
+          mm = '0' + mm
+      }
+      return mm + '/' + dd + '/' + yyyy;
+  }
+
+  function addDays(date, days) {
+      var result = new Date(date);
+      result.setDate(date.getDate() + days);
+      return result;
+  }
+
+  $('#chartDiv').highcharts({
+      chart: {
+          type: 'spline',
+          animation: Highcharts.svg,
+          ignoreHiddenSeries: false,
+          height: 400
+      },
+      title: {text: ''},
+      xAxis: {type: 'datetime'},
+      yAxis: {title: {text: 'Değer'}},
+      plotOptions: {spline: {lineWidth: 3, marker: {enabled: false},}},
+      tooltip: {
+          formatter: function () {
+              return 'Tarih : '+Highcharts.dateFormat('%d-%m-%Y %H:%M:%S', this.x) + '<br/>'
+                      + 'Değer: ' + Highcharts.numberFormat(this.y, 2);
+          }
+      },
+      series: [{
+          name: 'Akım',
+          visible: true,
+          data: []
+      }, {
+          name: 'Gerilim',
+          visible: false,
+          data: []
+      }, {
+          name: 'Sıcaklık',
+          visible: false,
+          data: []
+      }, {
+          name: 'Nem',
+          visible: false,
+          data: []
+      }],
+      legend: {
+          enabled: true
+      }
+  });
+
+  /* Veriler anlık görüntülenmek isteniyorsa bu fonksiyon çağırılıyor. */
+  $.datepicker._gotoToday = function() {
+      clearChart();
+
+      var chartTitle = document.getElementById('chartTitle');
+      chartTitle.innerHTML = 'Son 5 Dakika';
+
+      showCurrent = true;
+  }
+
+  /* Geçmişe dönük kayıtlar görüntülenmek isteniyorsa bu fonk. çağırılıyor. */
+  $('#datepicker').datepicker({
+      maxDate: 0,
+      currentText: 'Anlık Durum',
+      showButtonPanel: true,
+      onSelect: function (dateText) {
+          if (selectedPanelId != null) {
+              clearChart();
+
+              var chartTitle = document.getElementById('chartTitle');
+
+              showCurrent = false;
+
+              var selectedDate = new Date(dateText);
+              var nextDay = addDays(selectedDate, 1);
+
+              chartTitle.innerHTML = $.datepicker.formatDate('dd.mm.yy', selectedDate);
+
+              socket.emit('retrievePanelDataWithDate', selectedPanelId,
+                      selectedDate, nextDay);
+          }
+      }
+  });
+
+
+  function allDataShow(panelId) {
+
+      $('#panelTable').find('button.anlik').removeClass('btn-success').addClass('btn-default');
+
+      $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
+      $('button.gecmis-'+panelId).removeClass('btn-default').addClass('btn-success');
+
+      $('#chartTitle').css('display','none');
+      $('#chartDiv').css('display','none');
+      $('#chartOldDataDiv').css('display','block');
+
+      socket.emit('allDataShow', panelId, false);
+
+  }
+
+
+
+  socket.on('allShowDataListen', function (retData) {
+
+      //console.log(retData);
+      var chartData = [];
+
+      for (var i in retData) {
+
+          //console.log(retData[i]);
+
+          chartData[i] = {
+              name: retData[i]._id.month + '-' + retData[i]._id.year,
+              y: retData[i].ortAkim,
+              drilldown: retData[i]._id.month + '-' + retData[i]._id.year
+          };
+
+      }
+
+      console.log(chartData);
+
+      $('#chartOldDataDiv').highcharts({
+
+          chart: {type: 'column'},
+          title: {text: 'Panelinin Ortalama Verileri'},
+          subtitle: {text: 'Aya ait ortalama günlük verileri görmek için üzerine tıklayın.'},
+          xAxis: {type: 'category'},
+          yAxis: {
+              title: {
+                  text: 'Üretilen toplam enerji miktarı'
+              }
+          },
+          legend: {
+              enabled: false
+          },
+          plotOptions: {
+              series: {
+                  borderWidth: 0,
+                  dataLabels: {
+                      enabled: true,
+                      format: '{point.y:.1f} kW/saat'
+                  }
+              }
+          },
+
+          tooltip: {
+              headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+              pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f} kW/saat</b><br/>'
+          },
+
+          series: [{
+              name: 'Ortalama Veriler',
+              colorByPoint: true,
+              data: chartData
+          }],
+          drilldown: {
+              series: [{
+                  name: '2-2017',
+                  id: '2-2017',
+                  data: [
+                      [
+                          'v11.0',
+                          24.13
+                      ],
+                      [
+                          'v8.0',
+                          17.2
+                      ],
+                      [
+                          'v9.0',
+                          8.11
+                      ],
+                      [
+                          'v10.0',
+                          5.33
+                      ]
+                  ]
+              }]
+          }
+
+
+
+
+      });
+
+  });
+</script>
 </body>
 </html>

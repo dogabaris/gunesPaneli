@@ -25,15 +25,16 @@ module.exports = {
             PanelData.find({
                 panelId: panelId,
                 date: {
-                    $gte: date,
-                    $lt: nextDate
+                    $gte: date,//greater and equal
+                    $lt: nextDate//lesser than
                 }
             }, callBackForWithDate).sort({date: 1});
         });
     });
 
+
     console.log('rendera kadar çalışıyor');
 
-    res.render('homepage');
+    res.render('homepage', {message: ''});
   },
 };
