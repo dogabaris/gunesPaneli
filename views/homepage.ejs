@@ -15,18 +15,8 @@
     <script src="/js/highcharts/js/highcharts-more.js"></script>
 
 
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $('#datetimepicker').datepicker({
-                //format: "dd/mm/yyyy"
-            });
-
-
-        });
-    </script>
-
     <style>
-      .datepicker{width:100%;}
+      .datetimepicker{width:100%;}
     </style>
 
   </head>
@@ -178,11 +168,10 @@
       selectedPanelId = panel.id;
 
       if(!showCurrent) {
-          var selectedDate = new Date($('#datepicker').datepicker( "getDate" ));
+          var selectedDate = new Date($('#datetimepicker').datepicker( "getDate" ));
           var nextDay = addDays(selectedDate, 1);
 
-          socket.emit('retrievePanelDataWithDate', selectedPanelId,
-                  selectedDate, nextDay);
+          socket.emit('retrievePanelDataWithDate', selectedPanelId, selectedDate, nextDay);
       }
   }
 
@@ -340,7 +329,7 @@
   }
 
   /* Geçmişe dönük kayıtlar görüntülenmek isteniyorsa bu fonk. çağırılıyor. */
-  $('#datepicker').datepicker({
+  $('#datetimepicker').datepicker({
       maxDate: 0,
       currentText: 'Anlık Durum',
       showButtonPanel: true,
@@ -357,8 +346,8 @@
 
               chartTitle.innerHTML = $.datepicker.formatDate('dd.mm.yy', selectedDate);
 
-              socket.emit('retrievePanelDataWithDate', selectedPanelId,
-                      selectedDate, nextDay);
+              socket.emit('retrievePanelDataWithDate', selectedPanelId, selectedDate, nextDay);
+              console.log(selectedPanelId);
           }
       }
   });

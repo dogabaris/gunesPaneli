@@ -9,7 +9,7 @@ module.exports = {
 
   attributes: {
     panelId: {
-      type: 'integer',
+      type: 'objectid',
       required: true
     },
     akim: {

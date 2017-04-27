@@ -318,10 +318,11 @@ manageRender:function (req, res) {
         });
 
 
+        var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID; //panel ObjectId'ye dönüştürülmesi gerekiyor Mongoda ObjectId olarak tutulduğu için
 
         socket.on('allDataShow', function(panel){
 
-            //console.log(panel);
+            console.log(panel);
             PanelData.native(function(err, panelCollection) {//SAILSTE AGGREGATE KULLANIMI İÇİN
             if (err) return res.serverError(err);//hata döndürür
 
@@ -338,26 +339,33 @@ manageRender:function (req, res) {
 
             panelCollection.aggregate({
                 $match: {
-                    panelId: panel
+                    panelId: ObjectId(panel)
+                    //panelId: "56eb3d5d7c727d861b3278ec"
                 }
             })
                 .group({
                     _id: {
                         month: { $month: "$date" },
                         year: { $year: "$date" }
+                        //month: { $month: "3" },
+                        //year: { $year: "2016" }
                     },
                     ortAkim: {$avg: '$akim'},
                     ortGerilim: {$avg: '$gerilim'},
                     ortSicaklik: {$avg: '$sicaklik'},
                     totalNem: {$sum: '$nem'},
-                })
-                //.sort("-date")
-                .toArray(function (err, ret) {
-                  //console.log(ret);
+                    //ortAkim: {$avg: '152'},
+                    //ortGerilim: {$avg: '516'},
+                    //ortSicaklik: {$avg: '58'},
+                    //totalNem: {$sum: '51'},
+                }).toArray(function (err, ret) {
+                  console.log("2.log " + ret);
                   if (err) return res.serverError(err);
 
                   io.emit('allShowDataListen', ret);
               });
+              //.sort("-date")
+
 
             });
 
@@ -367,7 +375,7 @@ manageRender:function (req, res) {
 
 
     });
-    console.log('manage kadar çalışıyor');
+
     res.render('manage');
   }
 };

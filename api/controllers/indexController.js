@@ -28,12 +28,13 @@ module.exports = {
                     $gte: date,//greater and equal
                     $lt: nextDate//lesser than
                 }
-            }, callBackForWithDate).sort({date: 1});
+            }, callBackForWithDate); //.sort('date DESC')
+            //console.log(panelId + " " + date + " " + nextDate);
         });
     });
 
 
-    console.log('rendera kadar çalışıyor');
+
 
     res.render('homepage', {message: ''});
   },
