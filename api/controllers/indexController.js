@@ -18,6 +18,7 @@ module.exports = {
             }
 
             io.emit('addPanelDataList', !err ? paneldatas : []);
+            console.log(paneldatas);
         };
 
         socket.on('retrievePanelDataWithDate', function (panelId, date, nextDate) {
@@ -29,7 +30,7 @@ module.exports = {
                     $lt: nextDate//lesser than
                 }
             }, callBackForWithDate); //.sort('date DESC')
-            //console.log(panelId + " " + date + " " + nextDate);
+
         });
     });
 

@@ -1,11 +1,12 @@
 module.exports = {
     //var express = require('express');
-    //var mongoose = require('mongoose');
+
     //var events = require('events');
 manageRender:function (req, res) {
     var socket = req.socket;
     var io = sails.io;
     var events = require('events');
+    var mongoose = require('mongoose');
 
     //db
     //var Panel = mongoose.model('Panel');
@@ -318,28 +319,18 @@ manageRender:function (req, res) {
         });
 
 
-        var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID; //panel ObjectId'ye dönüştürülmesi gerekiyor Mongoda ObjectId olarak tutulduğu için
+        //var ObjectId = require('mongodb').ObjectID; //panel ObjectId'ye dönüştürülmesi gerekiyor Mongoda ObjectId olarak tutulduğu için
 
         socket.on('allDataShow', function(panel){
 
-            console.log(panel);
+
             PanelData.native(function(err, panelCollection) {//SAILSTE AGGREGATE KULLANIMI İÇİN
             if (err) return res.serverError(err);//hata döndürür
 
-            /*Pet.native(function(err, collection) {
-              if (err) return res.serverError(err);
-
-              collection.find({}, {
-                name: true
-              }).toArray(function (err, results) {
-                if (err) return res.serverError(err);
-                return res.ok(results);
-              });
-            });*/
-
+            console.log(panelCollection);
             panelCollection.aggregate({
                 $match: {
-                    panelId: ObjectId(panel)
+                    panelId: mongoose.Types.ObjectId(panel)
                     //panelId: "56eb3d5d7c727d861b3278ec"
                 }
             })
@@ -347,19 +338,13 @@ manageRender:function (req, res) {
                     _id: {
                         month: { $month: "$date" },
                         year: { $year: "$date" }
-                        //month: { $month: "3" },
-                        //year: { $year: "2016" }
                     },
                     ortAkim: {$avg: '$akim'},
                     ortGerilim: {$avg: '$gerilim'},
                     ortSicaklik: {$avg: '$sicaklik'},
-                    totalNem: {$sum: '$nem'},
-                    //ortAkim: {$avg: '152'},
-                    //ortGerilim: {$avg: '516'},
-                    //ortSicaklik: {$avg: '58'},
-                    //totalNem: {$sum: '51'},
+                    totalNem: {$sum: '$nem'}
                 }).toArray(function (err, ret) {
-                  console.log("2.log " + ret);
+                  //console.log("2.log " + ret.ortAkim);
                   if (err) return res.serverError(err);
 
                   io.emit('allShowDataListen', ret);

@@ -96,7 +96,7 @@
   var selectedPanelId = null;
   var showCurrent = true;
   var seriesList = ['akim', 'gerilim', 'sicaklik', 'nem'];
-  var activeSeries = 'current';
+  var activeSeries = 'voltage';
   var Series = {akim:{series: 0}, gerilim: {series: 1}, sicaklik: {series: 2}, nem: {series: 3}};
   var dataListOfTheHistorical = [];
 
@@ -224,16 +224,47 @@
   function updateChartWithHistoricalData() {
       var series = chart.series[0];
       var pointArr = [];
+      var series2 = chart.series[1];
+      var series3 = chart.series[2];
+      var series4 = chart.series[3];
+
+      var pointArr2 = [];
+      var pointArr3 = [];
+      var pointArr4 = [];
 
       for(var i = 0; i < dataListOfTheHistorical.length; i++) {
           var panelData = dataListOfTheHistorical[i];
 
           var x = (new Date(panelData.date)).getTime();
-          var y = panelData[activeSeries];
+          var y = panelData["current"];
           pointArr.push([x, y]);
+      }
+      for(var i = 0; i < dataListOfTheHistorical.length; i++) {
+          var panelData = dataListOfTheHistorical[i];
+
+          var x = (new Date(panelData.date)).getTime();
+          var y = panelData["voltage"];
+          pointArr2.push([x, y]);
+      }
+      for(var i = 0; i < dataListOfTheHistorical.length; i++) {
+          var panelData = dataListOfTheHistorical[i];
+
+          var x = (new Date(panelData.date)).getTime();
+          var y = panelData["temperature"];
+          pointArr3.push([x, y]);
+      }
+      for(var i = 0; i < dataListOfTheHistorical.length; i++) {
+          var panelData = dataListOfTheHistorical[i];
+
+          var x = (new Date(panelData.date)).getTime();
+          var y = panelData["moisture"];
+          pointArr4.push([x, y]);
       }
 
       series.setData(pointArr, true, false, true);
+      series2.setData(pointArr2, true, false, true);
+      series3.setData(pointArr3, true, false, true);
+      series4.setData(pointArr4, true, false, true);
   }
 
   /*function changeSeries(id) {
@@ -372,7 +403,7 @@
 
   socket.on('allShowDataListen', function (retData) {
 
-      //console.log(retData);
+      console.log(retData);
       var chartData = [];
 
       for (var i in retData) {
@@ -387,7 +418,7 @@
 
       }
 
-      console.log(chartData);
+      //console.log(chartData);
 
       $('#chartOldDataDiv').highcharts({
 

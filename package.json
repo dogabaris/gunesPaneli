@@ -27,6 +27,7 @@
     "jsdom": "latest",
     "moment": "^2.18.1",
     "mongodb": "~2.0",
+    "mongoose": "^4.9.6",
     "morgan": "~1.6.1",
     "rc": "1.0.1",
     "sails": "~0.12.13",
