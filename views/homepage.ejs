@@ -408,7 +408,7 @@
 
       for (var i in retData) {
 
-          //console.log(retData[i]);
+          console.log(retData[i].ortAkim);
 
           chartData[i] = {
               name: retData[i]._id.month + '-' + retData[i]._id.year,
@@ -425,7 +425,7 @@
           chart: {type: 'column'},
           title: {text: 'Panelinin Ortalama Verileri'},
           subtitle: {text: 'Aya ait ortalama günlük verileri görmek için üzerine tıklayın.'},
-          xAxis: {type: 'category'},
+          xAxis: {type: 'category', text: "name"},
           yAxis: {
               title: {
                   text: 'Üretilen toplam enerji miktarı'

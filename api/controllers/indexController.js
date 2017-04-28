@@ -18,7 +18,7 @@ module.exports = {
             }
 
             io.emit('addPanelDataList', !err ? paneldatas : []);
-            console.log(paneldatas);
+            //console.log(paneldatas);
         };
 
         socket.on('retrievePanelDataWithDate', function (panelId, date, nextDate) {

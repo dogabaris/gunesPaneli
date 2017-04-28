@@ -318,48 +318,65 @@ manageRender:function (req, res) {
             });
         });
 
+        /*PanelData.find().groupBy({{
+                                  _id: {
+                                      month: { $month: "$date" },
+                                      year: { $year: "$date" }
+                                  },
+                                  ortAkim: {$avg: '$akim'},
+                                  ortGerilim: {$avg: '$gerilim'},
+                                  ortSicaklik: {$avg: '$sicaklik'},
+                                  totalNem: {$sum: '$nem'}
+                              }).exec(function (err, data){
+                                if (err) return res.serverError(err);
 
-        //var ObjectId = require('mongodb').ObjectID; //panel ObjectId'ye dönüştürülmesi gerekiyor Mongoda ObjectId olarak tutulduğu için
+                                io.emit('allShowDataListen', ret);
+                              });*/
+
+
+        var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID; //panel ObjectId'ye dönüştürülmesi gerekiyor Mongoda ObjectId olarak tutulduğu için
 
         socket.on('allDataShow', function(panel){
-
 
             PanelData.native(function(err, panelCollection) {//SAILSTE AGGREGATE KULLANIMI İÇİN
             if (err) return res.serverError(err);//hata döndürür
 
-            console.log(panelCollection);
-            panelCollection.aggregate({
+            console.log("*** " + ObjectId(panel));
+
+            panelCollection.aggregate([
+              {
                 $match: {
-                    panelId: mongoose.Types.ObjectId(panel)
+                    panelId: ObjectId(panel)
                     //panelId: "56eb3d5d7c727d861b3278ec"
                 }
-            })
-                .group({
-                    _id: {
-                        month: { $month: "$date" },
-                        year: { $year: "$date" }
-                    },
-                    ortAkim: {$avg: '$akim'},
-                    ortGerilim: {$avg: '$gerilim'},
-                    ortSicaklik: {$avg: '$sicaklik'},
-                    totalNem: {$sum: '$nem'}
-                }).toArray(function (err, ret) {
-                  //console.log("2.log " + ret.ortAkim);
+              },
+              {
+                $group: {
+                  _id: {
+                      month: { $month: "$date" },
+                      year: { $year: "$date" }
+                      //month: { $month: "3" },
+                      //year: { $year: "2017" }
+                  },
+                  ortAkim: {$avg: "$current"},
+                  ortGerilim: {$avg: "$voltage"},
+                  ortSicaklik: {$avg: "$temperature"},
+                  totalNem: {$sum: "$moisture"}
+                }
+              }
+            ],
+            function (err, ret) {
+                  //console.log("******** " + ret);
                   if (err) return res.serverError(err);
 
                   io.emit('allShowDataListen', ret);
-              });
-              //.sort("-date")
-
-
             });
-
+              //.sort("-date")
+            });
         });
 
-
-
-
     });
+
 
     res.render('manage');
   }
