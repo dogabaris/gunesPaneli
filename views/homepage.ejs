@@ -64,13 +64,13 @@
         </div>
         <h4 style="margin-top: 50px;">Tarih / Anlık Durum</h4>
 
-        <div class="form-group">
+      <div class="form-group">
         <div class="row">
             <div class="col-md-8">
                 <div id="datetimepicker" class="datetimepicker"></div>
             </div>
         </div>
-    </div>
+      </div>
 
       </div>
       <div class="col-md-9">
@@ -95,6 +95,8 @@
   var chart = null;
   var selectedPanelId = null;
   var showCurrent = true;
+  var showYillik = null;
+  var selectedDate;
   var seriesList = ['akim', 'gerilim', 'sicaklik', 'nem'];
   var activeSeries = 'voltage';
   var Series = {akim:{series: 0}, gerilim: {series: 1}, sicaklik: {series: 2}, nem: {series: 3}};
@@ -126,7 +128,7 @@
       if (!chart) {
           chart = getChart();
       }
-      console.log(panelData);
+      //console.log(panelData);
       if (chart) {
           updateChartWithCurrentData(panelData);
       }
@@ -148,11 +150,16 @@
       row += '<button type="button" class="anlik btn btn-default btn-xs" aria-label="Left Align" id="' + panel.id + '_show">';
       row += '<span class="glyphicon glyphicon-eye-close" aria-hidden="true" id="' + panel.id + '_glyph"></span>';
       row += '</button>';
-      row += '<button type="button" class="gecmis btn btn-default btn-xs gecmis-'+panel.id+'" onClick="allDataShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-signal"></span></button></td>';
+      row += '<button type="button" class="gecmis btn btn-default btn-xs gecmis-'+panel.id+'" onClick="allDataShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-signal"></span></button>';
+      row += '<button type="button" class="yillik btn btn-default btn-xs yillik-'+panel.id+'" id="' + panel.id + '_showYears" style="margin-left:5px;"><span class="glyphicon glyphicon-search"></span></button></td>';
       row += '</tr>';
       $('#panelTable').find('> tbody:last-child').append(row);
       $('#' + panel.id + '_show').click(function () {
           showPanelDetail(panel);
+      });
+      $('#' + panel.id + '_showYears').click(function () {
+        showYillik=true;
+          showPanelDetailYears(panel);
       });
   }
 
@@ -174,11 +181,33 @@
           socket.emit('retrievePanelDataWithDate', selectedPanelId, selectedDate, nextDay);
       }
   }
+  /* Yıllık verileri gösterilecek panelleri seçiyoruz */
+  function showPanelDetailYears(panel) {
+      clearChart();
+
+      $('#panelTable').find('button.anlik').removeClass('btn-success').addClass('btn-default');
+      //$('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
+      $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
+      $('button.yillik-'+panel.id).removeClass('btn-default').addClass('btn-success');
+
+      selectedPanelId = panel.id;
+
+      selectedDate = new Date($('#datetimepicker').datepicker( "getDate" ));
+      //var date = $(this).datepicker('getDate');
+      day  = selectedDate.getDate();
+      //console.log(day);
+      //var nextDay = addDays(selectedDate, 1);
+      if(day != null){
+        socket.emit('retrievePanelDataWithDateYears', selectedPanelId, day);
+      }
+
+
+  }
 
   function clearChart() {
 
       $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
-
+      $('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
       $('#chartDiv').css('display', 'block');
       $('#chartTitle').css('display','block');
       $('#chartOldDataDiv').css('display', 'none');
@@ -267,29 +296,6 @@
       series4.setData(pointArr4, true, false, true);
   }
 
-  /*function changeSeries(id) {
-
-      for(var i = 0; i < seriesList.length; i++) {
-          var btn = $('#' + seriesList[i]);
-          btn.removeClass('btn-primary').removeClass('btn-default');
-          btn.addClass('btn-default');
-      }
-
-      var clickedBtn = $('#' + id);
-      clickedBtn.removeClass('btn-primary').removeClass('btn-default');
-      clickedBtn.addClass('btn-primary');
-
-      activeSeries = id;
-
-      Series[id].active = (Series[id].active + 1) % 2;
-
-      clearChart();
-
-      if(!showCurrent) {
-          updateChartWithHistoricalData();
-      }
-  }*/
-
   function getToday() {
       var today = new Date();
       var dd = today.getDate();
@@ -361,11 +367,32 @@
 
   /* Geçmişe dönük kayıtlar görüntülenmek isteniyorsa bu fonk. çağırılıyor. */
   $('#datetimepicker').datepicker({
+      useCurrent: false,
       maxDate: 0,
       currentText: 'Anlık Durum',
       showButtonPanel: true,
       onSelect: function (dateText) {
           if (selectedPanelId != null) {
+
+            if(showYillik==true){ // Günün yıllara oranı isteniyorsa showYillik true yapılır buttona tıklandığında.
+
+              //clearChart();
+              showCurrent = false;
+              showYillik = false;
+              var selectedDate = new Date(dateText);
+
+              var date = $(this).datepicker('getDate');
+              day  = date.getDate();
+
+              //console.log("Gün = " + day);
+
+              //chartTitle.innerHTML = $.datepicker.formatDate('dd.mm.yy', selectedDate);
+              //console.log(selectedDate);
+
+              socket.emit('retrievePanelDataWithDateYears', selectedPanelId, day);
+              //console.log(selectedPanelId);
+
+            }else{ // Eskiye dönük özel olarak bir günün içeriği görüntülenmek istenirse burası çalıştırılır.
               clearChart();
 
               var chartTitle = document.getElementById('chartTitle');
@@ -378,10 +405,39 @@
               chartTitle.innerHTML = $.datepicker.formatDate('dd.mm.yy', selectedDate);
 
               socket.emit('retrievePanelDataWithDate', selectedPanelId, selectedDate, nextDay);
-              console.log(selectedPanelId);
+              //console.log(selectedPanelId);
+            }
+
+
           }
       }
   });
+
+  /* Geçmişe dönük kayıtların bir günün yıllara göre dağılımı görüntülenmek isteniyorsa bu fonk. çağırılıyor. */
+  /*
+  $('#datetimepicker2').datepicker({
+      maxDate: 0,
+      onSelect: function (dateText) {
+          if (selectedPanelId != null) {
+              clearChart();
+
+              var chartTitle = document.getElementById('chartTitle');
+              showCurrent = false;
+              var selectedDate = new Date(dateText);
+
+              var date = $(this).datepicker('getDate');
+              day  = date.getDate();
+
+              //console.log("Gün = " + day);
+
+              //chartTitle.innerHTML = $.datepicker.formatDate('dd.mm.yy', selectedDate);
+              //console.log(selectedDate);
+
+              socket.emit('retrievePanelDataWithDateYears', selectedPanelId, day);
+              //console.log(selectedPanelId);
+          }
+      }
+  });*/
 
 
   function allDataShow(panelId) {
@@ -399,16 +455,12 @@
 
   }
 
-
-
   socket.on('allShowDataListen', function (retData) {
 
-      console.log(retData);
+
       var chartData = [];
 
       for (var i in retData) {
-
-          console.log(retData[i].ortAkim);
 
           chartData[i] = {
               name: retData[i]._id.month + '-' + retData[i]._id.year,
@@ -418,13 +470,13 @@
 
       }
 
-      //console.log(chartData);
+
 
       $('#chartOldDataDiv').highcharts({
 
           chart: {type: 'column'},
           title: {text: 'Panelinin Ortalama Verileri'},
-          subtitle: {text: 'Aya ait ortalama günlük verileri görmek için üzerine tıklayın.'},
+          subtitle: {text: 'Ortalama aylık verileri görmek için üzerine tıklayın.'},
           xAxis: {type: 'category', text: "name"},
           yAxis: {
               title: {
@@ -485,6 +537,93 @@
       });
 
   });
+
+
+  socket.on('allShowDataListenYears', function (retData) {
+
+      //console.log(retData);
+      var chartData = [];
+
+      for (var i in retData) {
+
+          //console.log(retData[i].ortAkim);
+
+          chartData[i] = {
+              name: selectedDate.getDate() + "-" + retData[i]._id,
+              y: retData[i].ortAkim,
+              drilldown: selectedDate.getDate() + '-' + retData[i]._id
+          };
+
+      }
+
+      console.log(retData);
+
+      $('#chartOldDataDiv').highcharts({
+
+          chart: {type: 'column'},
+          title: {text: 'Panelinin Ortalama Verileri'},
+          subtitle: {text: 'Yıllara göre ortalama günlük verileri görmek için üzerine tıklayın.'},
+          xAxis: {type: 'category', text: "name"},
+          yAxis: {
+              title: {
+                  text: 'Üretilen toplam enerji miktarı'
+              }
+          },
+          legend: {
+              enabled: false
+          },
+          plotOptions: {
+              series: {
+                  borderWidth: 0,
+                  dataLabels: {
+                      enabled: true,
+                      format: '{point.y:.1f} kW/saat'
+                  }
+              }
+          },
+
+          tooltip: {
+              headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+              pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f} kW/saat</b><br/>'
+          },
+
+          series: [{
+              name: 'Ortalama Veriler',
+              colorByPoint: true,
+              data: chartData
+          }],
+          /*drilldown: {
+              series: [{
+                  name: '2-2017',
+                  id: '2-2017',
+                  data: [
+                      [
+                          'v11.0',
+                          24.13
+                      ],
+                      [
+                          'v8.0',
+                          17.2
+                      ],
+                      [
+                          'v9.0',
+                          8.11
+                      ],
+                      [
+                          'v10.0',
+                          5.33
+                      ]
+                  ]
+              }]
+          }*/
+
+
+
+
+      });
+
+  });
+
 </script>
 </body>
 </html>

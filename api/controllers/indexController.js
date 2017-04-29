@@ -32,6 +32,50 @@ module.exports = {
             }, callBackForWithDate); //.sort('date DESC')
 
         });
+
+        var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
+
+        socket.on('retrievePanelDataWithDateYears', function (panelId, date) { //Verilen gün yıllara göre ortalamalarını gösterir.
+
+                PanelData.native(function(err, panelCollection) {//SAILSTE AGGREGATE KULLANIMI İÇİN
+                if (err) return res.serverError(err);
+
+                panelCollection.aggregate([
+                  {
+                    $addFields: {
+                                  year: {$year: "$date"},
+                                  day: {$dayOfMonth: "$date"},
+                                  month : {$month: "$date" }
+                                }
+                  },
+                  {
+                    $match: {
+                        panelId: ObjectId(panelId),
+                        day: date
+                        //panelId: "56eb3d5d7c727d861b3278ec"
+                    }
+                  },
+                  {
+                    $group: {
+                      _id: "$year" ,
+                      ortAkim: {$avg: "$current"},
+                      ortGerilim: {$avg: "$voltage"},
+                      ortSicaklik: {$avg: "$temperature"},
+                      totalNem: {$sum: "$moisture"}
+                    }
+                  }
+
+                ],
+                function (err, ret) {
+                      //console.log("******** " + ret);
+                      if (err) return res.serverError(err);
+                      //console.log(date);
+                      io.emit('allShowDataListenYears', ret);
+                });
+
+                });
+        });
+
     });
 
 

@@ -173,7 +173,7 @@ manageRender:function (req, res) {
         });
 
         socket.on('editPanel', function(panel) {
-            console.log(panel);
+            //console.log(panel);
 
 
             Panel.findById(panel._id, function(err, p){
@@ -258,14 +258,14 @@ manageRender:function (req, res) {
 
         socket.on('verileriKaydetDagit', function(veriler){
 
-            if(veriler.secKey != (veriler.akim+''+veriler.gerilim+''+veriler.sicaklik+''+veriler.nem)){
+            /*if(veriler.secKey != (veriler.akim+''+veriler.gerilim+''+veriler.sicaklik+''+veriler.nem)){
 
-                console.log('hatali gonderim!!');
+                console.log('hatali gonderim!! ' + veriler.akim);
 
-            }else{
-
+            }else{*/
+                //console.log('else girdi!!');
                 /* Eğer mac adresi herhangi bir panelid le eşleşmiyorsa veritabanından panelidyi kontrol edip macToPanelId dizisine değeri tanımlıyor*/
-                if(!macToPanelId[veriler.macAddr]){
+                /*if(!macToPanelId[veriler.macAddr]){
 
                     Panel.findOne({macAddr: veriler.macAddr}, function(err, res){
 
@@ -277,25 +277,25 @@ manageRender:function (req, res) {
                         }
                     });
 
-                }else{
+                }else{*/
 
-                    var newPanelData = new PanelData({
-                        panelId     : macToPanelId[veriler.macAddr], //veriler.panelId,
-                        akim        : veriler.akim,
-                        gerilim     : veriler.gerilim,
-                        sicaklik    : veriler.sicaklik,
-                        nem         : veriler.nem,
-                        date        : new Date()
-                    });
-                    newPanelData.save(function(err){
-                        if(err) {
-                            console.error(err);
-                        }
-                    });
-                    io.emit('retrievePanelData', newPanelData);
-                }
+                  PanelData.create({
+                      panelId     : veriler.panelId, //veriler.panelId,
+                      akim        : veriler.akim,
+                      gerilim     : veriler.gerilim,
+                      sicaklik    : veriler.sicaklik,
+                      nem         : veriler.nem,
+                      date        : new Date()
+                  }).exec(function (err, newPanelData) {
+                      if (err) return res.negotiate(err);
 
-            }
+                      //console.log("kaydedildi!");
+                      //io.emit('retrievePanelData', newPanelData);
+                  });
+
+                //}
+
+            //}
         });
 
 
@@ -341,7 +341,7 @@ manageRender:function (req, res) {
             PanelData.native(function(err, panelCollection) {//SAILSTE AGGREGATE KULLANIMI İÇİN
             if (err) return res.serverError(err);//hata döndürür
 
-            console.log("*** " + ObjectId(panel));
+            //console.log("*** " + ObjectId(panel));
 
             panelCollection.aggregate([
               {
