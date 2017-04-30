@@ -77,6 +77,7 @@
         <h4 id="chartTitle">Son 1 Dakika</h4>
         <div id="chartDiv"></div>
         <div id="chartOldDataDiv" style="display:none;"></div>
+        <div id="chartOldDataYearsDiv" style="display:none;"></div>
       </div>
     </div>
   </div>
@@ -183,10 +184,10 @@
   }
   /* Yıllık verileri gösterilecek panelleri seçiyoruz */
   function showPanelDetailYears(panel) {
-      clearChart();
+      //clearChart();
 
       $('#panelTable').find('button.anlik').removeClass('btn-success').addClass('btn-default');
-      //$('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
+      $('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
       $('button.yillik-'+panel.id).removeClass('btn-default').addClass('btn-success');
 
@@ -211,6 +212,7 @@
       $('#chartDiv').css('display', 'block');
       $('#chartTitle').css('display','block');
       $('#chartOldDataDiv').css('display', 'none');
+      $('#chartOldDataYearsDiv').css('display', 'none');
 
       if (!chart) {
           chart = getChart();
@@ -376,7 +378,7 @@
 
             if(showYillik==true){ // Günün yıllara oranı isteniyorsa showYillik true yapılır buttona tıklandığında.
 
-              //clearChart();
+              clearChart();
               showCurrent = false;
               showYillik = false;
               var selectedDate = new Date(dateText);
@@ -443,13 +445,14 @@
   function allDataShow(panelId) {
 
       $('#panelTable').find('button.anlik').removeClass('btn-success').addClass('btn-default');
-
+      $('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
       $('button.gecmis-'+panelId).removeClass('btn-default').addClass('btn-success');
 
       $('#chartTitle').css('display','none');
       $('#chartDiv').css('display','none');
       $('#chartOldDataDiv').css('display','block');
+      $('#chartOldDataYearsDiv').css('display','none');
 
       socket.emit('allDataShow', panelId, false);
 
@@ -541,14 +544,19 @@
 
   socket.on('allShowDataListenYears', function (retData) {
 
+    $('#chartTitle').css('display','none');
+    $('#chartDiv').css('display','none');
+    $('#chartOldDataDiv').css('display','none');
+    $('#chartOldDataYearsDiv').css('display','block');
+
       //console.log(retData);
-      var chartData = [];
+      var chartDataYears = [];
 
       for (var i in retData) {
 
-          //console.log(retData[i].ortAkim);
+          console.log(selectedDate.getDate());
 
-          chartData[i] = {
+          chartDataYears[i] = {
               name: selectedDate.getDate() + "-" + retData[i]._id,
               y: retData[i].ortAkim,
               drilldown: selectedDate.getDate() + '-' + retData[i]._id
@@ -558,7 +566,7 @@
 
       console.log(retData);
 
-      $('#chartOldDataDiv').highcharts({
+      $('#chartOldDataYearsDiv').highcharts({
 
           chart: {type: 'column'},
           title: {text: 'Panelinin Ortalama Verileri'},
@@ -590,9 +598,9 @@
           series: [{
               name: 'Ortalama Veriler',
               colorByPoint: true,
-              data: chartData
+              data: chartDataYears
           }],
-          /*drilldown: {
+          drilldown: {
               series: [{
                   name: '2-2017',
                   id: '2-2017',
@@ -615,7 +623,7 @@
                       ]
                   ]
               }]
-          }*/
+          }
 
 
 
