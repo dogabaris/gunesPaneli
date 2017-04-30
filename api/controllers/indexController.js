@@ -61,7 +61,7 @@ module.exports = {
                       ortAkim: {$avg: "$current"},
                       ortGerilim: {$avg: "$voltage"},
                       ortSicaklik: {$avg: "$temperature"},
-                      totalNem: {$sum: "$moisture"}
+                      ortNem: {$avg: "$moisture"}
                     }
                   }
 

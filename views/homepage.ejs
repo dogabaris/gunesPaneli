@@ -462,8 +462,20 @@
 
 
       var chartData = [];
+      var akim = [];
+      var gerilim = [];
+      var sicaklik = [];
+      var nem = [];
+      var chartDataYears = [];
+      var names = [];
 
       for (var i in retData) {
+
+        akim[i] = retData[i].ortAkim;
+        gerilim[i] = retData[i].ortGerilim;
+        sicaklik[i] = retData[i].ortSicaklik;
+        nem[i] = retData[i].ortNem;
+        names[i] = retData[i]._id.month + "-" + retData[i]._id.year;
 
           chartData[i] = {
               name: retData[i]._id.month + '-' + retData[i]._id.year,
@@ -480,34 +492,53 @@
           chart: {type: 'column'},
           title: {text: 'Panelinin Ortalama Verileri'},
           subtitle: {text: 'Ortalama aylık verileri görmek için üzerine tıklayın.'},
-          xAxis: {type: 'category', text: "name"},
+          xAxis: {
+            type: 'category',
+            text: "name",
+            categories: names,
+            crosshair: true
+          },
           yAxis: {
               title: {
-                  text: 'Üretilen toplam enerji miktarı'
+                  text: 'Ortalama değerler'
               }
           },
           legend: {
-              enabled: false
+              enabled: true
           },
           plotOptions: {
               series: {
                   borderWidth: 0,
                   dataLabels: {
                       enabled: true,
-                      format: '{point.y:.1f} kW/saat'
+                      format: '{point.y:.1f}'
                   }
               }
           },
 
           tooltip: {
-              headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-              pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f} kW/saat</b><br/>'
+              //headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+              //pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f} kW/saat</b><br/>'
+              headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+              pointFormat:  '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                            '<td style="padding:0"><b>{point.y:.1f} </b></td></tr>',
+              footerFormat: '</table>',
+              shared: true,
+              useHTML: true
           },
 
           series: [{
-              name: 'Ortalama Veriler',
-              colorByPoint: true,
-              data: chartData
+                  name: 'Akım',
+                  data: akim
+                  }, {
+                  name: 'Gerilim',
+                  data: gerilim
+                  }, {
+                  name: 'Sıcaklık',
+                  data: sicaklik
+                  }, {
+                  name: 'Nem',
+                  data: nem
           }],
           drilldown: {
               series: [{
@@ -551,82 +582,85 @@
 
       //console.log(retData);
       var chartDataYears = [];
+      var akim = [];
+      var gerilim = [];
+      var sicaklik = [];
+      var nem = [];
+      var chartDataYears = [];
+      var names = [];
 
       for (var i in retData) {
 
-          console.log(selectedDate.getDate());
+          //console.log(selectedDate.getDate());
+
+          akim[i] = retData[i].ortAkim;
+          gerilim[i] = retData[i].ortGerilim;
+          sicaklik[i] = retData[i].ortSicaklik;
+          nem[i] = retData[i].ortNem;
+          names[i] = selectedDate.getDate() + "-" + retData[i]._id;
 
           chartDataYears[i] = {
-              name: selectedDate.getDate() + "-" + retData[i]._id,
-              y: retData[i].ortAkim,
+              name: "",
+              y: retData[i].ortAkim ,
               drilldown: selectedDate.getDate() + '-' + retData[i]._id
           };
 
       }
 
-      console.log(retData);
+      //console.log(retData);
 
       $('#chartOldDataYearsDiv').highcharts({
 
           chart: {type: 'column'},
           title: {text: 'Panelinin Ortalama Verileri'},
           subtitle: {text: 'Yıllara göre ortalama günlük verileri görmek için üzerine tıklayın.'},
-          xAxis: {type: 'category', text: "name"},
+          xAxis: {
+            type: 'category',
+            text: "name",
+            categories: names,
+            crosshair: true
+          },
           yAxis: {
               title: {
-                  text: 'Üretilen toplam enerji miktarı'
+                  text: 'Ortalama Değerler'
               }
+
           },
           legend: {
-              enabled: false
+              enabled: true
           },
           plotOptions: {
               series: {
                   borderWidth: 0,
                   dataLabels: {
                       enabled: true,
-                      format: '{point.y:.1f} kW/saat'
+                      format: '{point.y:.1f} '
                   }
               }
           },
-
           tooltip: {
-              headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-              pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f} kW/saat</b><br/>'
+              //headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+              //pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f} kW/saat</b><br/>'
+              headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+              pointFormat:  '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                            '<td style="padding:0"><b>{point.y:.1f} </b></td></tr>',
+              footerFormat: '</table>',
+              shared: true,
+              useHTML: true
           },
-
           series: [{
-              name: 'Ortalama Veriler',
-              colorByPoint: true,
-              data: chartDataYears
-          }],
-          drilldown: {
-              series: [{
-                  name: '2-2017',
-                  id: '2-2017',
-                  data: [
-                      [
-                          'v11.0',
-                          24.13
-                      ],
-                      [
-                          'v8.0',
-                          17.2
-                      ],
-                      [
-                          'v9.0',
-                          8.11
-                      ],
-                      [
-                          'v10.0',
-                          5.33
-                      ]
-                  ]
-              }]
-          }
-
-
-
+                  name: 'Akım',
+                  data: akim
+                  }, {
+                  name: 'Gerilim',
+                  data: gerilim
+                  }, {
+                  name: 'Sıcaklık',
+                  data: sicaklik
+                  }, {
+                  name: 'Nem',
+                  data: nem
+          }]
 
       });
 
