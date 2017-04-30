@@ -375,6 +375,45 @@ manageRender:function (req, res) {
             });
         });
 
+        socket.on('allDataAllYearsShow', function(panel){
+
+            PanelData.native(function(err, panelCollection) {//SAILSTE AGGREGATE KULLANIMI İÇİN
+            if (err) return res.serverError(err);//hata döndürür
+
+            //console.log("*** " + ObjectId(panel));
+
+            panelCollection.aggregate([
+              {
+                $match: {
+                    panelId: ObjectId(panel)
+                    //panelId: "56eb3d5d7c727d861b3278ec"
+                }
+              },
+              {
+                $group: {
+                  _id: {
+                      //month: { $month: "$date" },
+                      year: { $year: "$date" }
+                      //month: { $month: "3" },
+                      //year: { $year: "2017" }
+                  },
+                  ortAkim: {$avg: "$current"},
+                  ortGerilim: {$avg: "$voltage"},
+                  ortSicaklik: {$avg: "$temperature"},
+                  ortNem: {$avg: "$moisture"}
+                }
+              }
+            ],
+            function (err, ret) {
+                  //console.log("******** " + ret);
+                  if (err) return res.serverError(err);
+
+                  io.emit('allShowDataListenAllYears', ret);
+            });
+              //.sort("-date")
+            });
+        });
+
     });
 
 
