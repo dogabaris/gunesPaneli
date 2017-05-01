@@ -21,6 +21,15 @@ module.exports = {
             //console.log(paneldatas);
         };
 
+        var callBackForWithDetails = function(err, paneldatas) {
+            if(err) {
+                console.error(err);
+            }
+
+            io.emit('addPanelDataDetailList', !err ? paneldatas : []);
+            //console.log(paneldatas);
+        };
+
         socket.on('retrievePanelDataWithDate', function (panelId, date, nextDate) {
 
             PanelData.find({
@@ -30,6 +39,18 @@ module.exports = {
                     $lt: nextDate//lesser than
                 }
             }, callBackForWithDate); //.sort('date DESC')
+
+        });
+
+        socket.on('retrieveDetails', function (panelId) {
+
+            PanelData.find({
+                panelId: panelId,
+                /*date: {
+                    $gte: date,//greater and equal
+                    $lt: nextDate//lesser than
+                }*/
+            }, callBackForWithDetails);
 
         });
 
