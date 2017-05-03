@@ -42,6 +42,7 @@ module.exports = {
 
         });
 
+
         socket.on('retrieveDetails', function (panelId) {
 
             PanelData.find({
