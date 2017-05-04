@@ -556,8 +556,8 @@
           height: 400,
           inverted: false // "true" is not supported in Highstock
       },
-      title: { startOnTick: false, // only when navigator enabled
-              endOnTick: false,
+      title: { //startOnTick: false, // only when navigator enabled
+              //endOnTick: false,
         text: 'Detaylı Takip'},
       xAxis: {type: 'datetime'},
       yAxis: {title: {text: 'Değer'}},
@@ -568,7 +568,7 @@
       },
 
       rangeSelector : {
-              enabled: false
+              enabled: true
       },
       tooltip: {
           formatter: function () {
