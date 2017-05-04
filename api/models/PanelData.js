@@ -7,8 +7,12 @@
 
 module.exports = {
 
+  autoCreatedAt: false,
+  autoUpdatedAt: false,
+
   attributes: {
     panelId: {
+      //type: 'json', //otomatik veri ekleneceğinde kullanılan format
       type: 'objectid',
       required: true
     },
@@ -37,5 +41,19 @@ module.exports = {
       required: true
     }
   },
+
+  new: function(inputs, cb){
+    PanelData.create({
+      panelId: inputs.panelId,
+      current: inputs.current,
+      voltage: inputs.voltage,
+      light: inputs.light,
+      temperature: inputs.temperature,
+      moisture: inputs.moisture,
+      date: inputs.date
+    })
+    .exec(cb);
+  },
+
   connection: 'mongodb'
 };

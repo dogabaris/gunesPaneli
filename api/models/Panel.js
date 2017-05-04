@@ -12,22 +12,28 @@ module.exports = {
       type: 'string',
       required: true
     },
-    location: {
+    cityCode: {
       type: 'string',
-      required: true
     },
-    macAddr: {
+    countryCode: {
       type: 'string',
-      required: true
-    },
-    ipAddr: {
-      type: 'string',
-      required: true
     },
     status: {
       type: 'boolean',
-      required: true
+      defaultsTo: 'true'
     }
   },
+
+  new: function(inputs, cb){
+    Panel.create({
+      name: inputs.name,
+      cityCode: inputs.cityCode,
+      status: inputs.status,
+      countryCode: inputs.countryCode,
+      status: inputs.status
+    })
+    .exec(cb);
+  },
+
   connection: 'mongodb'
 };

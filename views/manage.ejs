@@ -69,11 +69,12 @@
           var panel         = {};
           panel.name        = pName.val();
           panel.status      = pStatus.prop('checked');
-          panel.location    = $('#location').val();
-          panel.macAddr     = $('#macAddr').val();
-          panel.ipAddr      = '-';
+          //panel.location    = $('#location').val();
+          //panel.macAddr     = $('#macAddr').val();
+        //  panel.ipAddr      = '-';
           if(pId.val()=='') {
               socket.emit('addPanel', panel);
+              console.log(panel);
           } else {
               panel._id = pId.val();
               socket.emit('editPanel', panel);
@@ -229,7 +230,7 @@
   <footer class="footer">
     <div class="container">
       <p class="text-muted">
-        &copy; Kocaeli Üniversitesi Bilgisayar Mühendisliği 2016
+        &copy; Kocaeli Üniversitesi Bilgisayar Mühendisliği 2017
       </p>
     </div>
   </footer>

@@ -5,11 +5,11 @@ module.exports.cron = {
     /*onTick: function () {
       console.log("tick");
 
-      var d_akim = 50;
-      var d_geri = 40;
-      var d_sica = 30;
-      var d_nem  = 20;
-      var d_ligh = 10;
+      var d_akim = 70;
+      var d_geri = 50;
+      var d_sica = 40;
+      var d_nem  = 30;
+      var d_ligh = 25;
 
 
       function rand(sayi){
@@ -35,26 +35,23 @@ module.exports.cron = {
       moisture: d_nem = rand(d_nem)
       };
 
-      var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
-      //var mongoose = require('mongoose');
 
-      PanelData.create({
-          panelId        : new ObjectId(veriler.panelId), //veriler.panelId,
+      //var ObjectId = require('mongodb').ObjectID;
+      var oid = new (require('mongodb').ObjectId)(veriler.panelId);
+
+      PanelData.new({
+          panelId        : oid, //veriler.panelId,
           current        : veriler.current,
           voltage        : veriler.voltage,
           light          : veriler.light,
           temperature    : veriler.temperature,
           moisture       : veriler.moisture,
           date        : new Date()
-      }).exec(function(err, newPanelData)
-      {
-        if(err)
-          console.log(err);
-        else
-          console.log(newPanelData);
-
-
-
+      }, function (err, newPanelData) {
+            if(err)
+              console.log(err);
+            else
+              console.log(newPanelData);
       });
 
     }*/

@@ -140,25 +140,24 @@ manageRender:function (req, res) {
             sendPanelList(page, setMap);
         });
 
-        socket.on('addPanelData', function(data) {
-            var newPanelData = new PanelData({
-                panelId: data.id,
-                akim: data.current,
-                gerilim: data.voltage,
-                sicaklik: data.temperature,
-                nem: data.moisture,
-                date: data.date
-            });
+        socket.on('addPanel', function(data) {
 
+          Panel.new({
+            name: data.name,
+            cityCode: data.cityCode,
+            status: data.status,
+            countryCode: data.countryCode,
+            status: data.status,  //ekleyen kullanıcının id'si
+          }, function (err, newPanelData) {
+                if(err)
+                  console.log(err);
+                else
+                  console.log(newPanelData);
+          });
 
-            newPanelData.save(function(err){
-                if(err) {
-                    console.error(err);
-                }
-            });
         });
 
-        socket.on('addPanel', function(panel) {
+        socket.on('addPanel2', function(panel) {
             var newPanel = new Panel(panel);
 
 
