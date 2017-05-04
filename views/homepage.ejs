@@ -109,6 +109,11 @@
 
   var socket = io();
 
+
+  $(document).ready(function(){
+      $('[data-toggle="tooltip"]').tooltip();
+  });
+
   /* Panelleri bu fonksiyon listeliyor. */
   socket.on('retrievePanelList', function (panelList) {
       $('#panelTable').find('> tbody > tr').remove();
@@ -159,13 +164,13 @@
       row += '<th scope="row">' + (index + 1) + '</th>';
       row += '<td>' + panel.name + '</td>';
       row += '<td>';
-      row += '<button type="button" class="anlik btn btn-default btn-xs" aria-label="Left Align" id="' + panel.id + '_show">';
+      row += '<button type="button" data-toggle="tooltip" title="Seçilen Gün!" class="anlik btn btn-default btn-xs" aria-label="Left Align" id="' + panel.id + '_show">';
       row += '<span class="glyphicon glyphicon-eye-close" aria-hidden="true" id="' + panel.id + '_glyph"></span>';
       row += '</button>';
-      row += '<button type="button" class="gecmis btn btn-default btn-xs gecmis-'+panel.id+'" onClick="allDataShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-signal"></span></button>';
-      row += '<button type="button" class="yillik btn btn-default btn-xs yillik-'+panel.id+'" id="' + panel.id + '_showYears" style="margin-left:5px;"><span class="glyphicon glyphicon-search"></span></button>';
-      row += '<button type="button" class="yillar btn btn-default btn-xs yillar-'+panel.id+'" onClick="allDataAllYearsShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-calendar"></span></button>';
-      row += '<button type="button" class="detayli btn btn-default btn-xs detayli-'+panel.id+'" onClick="allDataDetailsShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-time"></span></button></td>';
+      row += '<button type="button" data-toggle="tooltip" title="Aylar!" class="gecmis btn btn-default btn-xs gecmis-'+panel.id+'" onClick="allDataShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-signal"></span></button>';
+      row += '<button type="button" data-toggle="tooltip" title="Günün yıllara oranı!" class="yillik btn btn-default btn-xs yillik-'+panel.id+'" id="' + panel.id + '_showYears" style="margin-left:5px;"><span class="glyphicon glyphicon-search"></span></button>';
+      row += '<button type="button" data-toggle="tooltip" title="Yıllar!" class="yillar btn btn-default btn-xs yillar-'+panel.id+'" onClick="allDataAllYearsShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-calendar"></span></button>';
+      row += '<button type="button" data-toggle="tooltip" title="Zaman Aralığı!" class="detayli btn btn-default btn-xs detayli-'+panel.id+'" onClick="allDataDetailsShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-time"></span></button></td>';
       row += '</tr>';
       $('#panelTable').find('> tbody:last-child').append(row);
       $('#' + panel.id + '_show').click(function () {//bir günü özel olarak incelemek için
@@ -310,10 +315,16 @@
           pointArr4.push([x, y]);
       }
 
+      pointArr.sort(function(a,b) { return a[0] - b[0]; })
+      pointArr2.sort(function(a,b) { return a[0] - b[0]; })
+      pointArr3.sort(function(a,b) { return a[0] - b[0]; })
+      pointArr4.sort(function(a,b) { return a[0] - b[0]; })
+
       series.setData(pointArr, true, false, true);
       series2.setData(pointArr2, true, false, true);
       series3.setData(pointArr3, true, false, true);
       series4.setData(pointArr4, true, false, true);
+
   }
 
 
@@ -341,7 +352,7 @@
       chart: {
           type: 'spline',
           animation: Highcharts.svg,
-          ignoreHiddenSeries: false,
+          //ignoreHiddenSeries: false,
           height: 400
       },
       title: {text: ''},
@@ -555,7 +566,7 @@
                               showInNavigator: true
             }
         },
-        
+
         scrollbar: {
             enabled: true
         },
@@ -673,30 +684,6 @@
                   name: 'Nem',
                   data: nem
           }],
-          drilldown: {
-              series: [{
-                  name: '2-2017',
-                  id: '2-2017',
-                  data: [
-                      [
-                          'v11.0',
-                          24.13
-                      ],
-                      [
-                          'v8.0',
-                          17.2
-                      ],
-                      [
-                          'v9.0',
-                          8.11
-                      ],
-                      [
-                          'v10.0',
-                          5.33
-                      ]
-                  ]
-              }]
-          }
 
 
 
@@ -810,7 +797,7 @@
     $('#chartOldDataAllYearsDiv').css('display','block');
     $('#chartDetailsDiv').css('display','none');
 
-      console.log(retData);
+      //console.log(retData);
       var chartDataYears = [];
       var akim = [];
       var gerilim = [];
@@ -893,8 +880,9 @@
           }]
 
       });
-
   });
+
+
 
 </script>
 </body>
