@@ -12,19 +12,23 @@ module.exports = {
       type: 'objectid',
       required: true
     },
-    akim: {
+    current: {
       type: 'integer',
       required: true
     },
-    gerilim: {
+    voltage: {
       type: 'integer',
       required: true
     },
-    sicaklik: {
+    light: {
       type: 'integer',
       required: true
     },
-    nem: {
+    temperature: {
+      type: 'integer',
+      required: true
+    },
+    moisture: {
       type: 'integer',
       required: true
     },

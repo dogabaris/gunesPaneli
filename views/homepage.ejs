@@ -538,37 +538,53 @@
         chart: {
             type: 'spline',
             animation: Highcharts.svg,
-            ignoreHiddenSeries: false,
-            height: 400
+            //ignoreHiddenSeries: true,
+            height: 400,
+            inverted: false // "true" is not supported in Highstock
         },
-        title: {text: 'Detaylı Takip'},
+        title: { startOnTick: false, // only when navigator enabled
+                endOnTick: false,
+          text: 'Detaylı Takip'},
         xAxis: {type: 'datetime'},
         yAxis: {title: {text: 'Değer'}},
-        plotOptions: {spline: {lineWidth: 3, marker: {enabled: false},series: {
-                showInNavigator: true
-            }}},
+        plotOptions: {spline:
+                        {lineWidth: 3,
+                          marker: {enabled: false},
+                        },
+                      series: {
+                              showInNavigator: true
+            }
+        },
+        
+        scrollbar: {
+            enabled: true
+        },
+        rangeSelector: {
+            enabled: true
+        },
         tooltip: {
             formatter: function () {
                 return 'Tarih : '+Highcharts.dateFormat('%d-%m-%Y %H:%M:%S', this.x) + '<br/>'
                         + 'Değer: ' + Highcharts.numberFormat(this.y, 2);
             }
+            //pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} </b><br/>',
         },
         series: [{
             name: 'Akım',
             visible: true,
-            data: pointArr
+            data: pointArr.sort(function(a,b) { return a[0] - b[0]; })
         }, {
             name: 'Gerilim',
             visible: true,
-            data: pointArr2
+            data: pointArr2.sort(function(a,b) { return a[0] - b[0]; })
         }, {
             name: 'Sıcaklık',
             visible: true,
-            data: pointArr3
+            data: pointArr3.sort(function(a,b) { return a[0] - b[0]; })
         }, {
             name: 'Nem',
             visible: true,
-            data: pointArr4
+            data: pointArr4.sort(function(a,b) { return a[0] - b[0]; })
         }],
         legend: {
             enabled: true

@@ -256,46 +256,27 @@ manageRender:function (req, res) {
         * */
         var macToPanelId = {};
 
-        socket.on('verileriKaydetDagit', function(veriler){
-
-            /*if(veriler.secKey != (veriler.akim+''+veriler.gerilim+''+veriler.sicaklik+''+veriler.nem)){
-
-                console.log('hatali gonderim!! ' + veriler.akim);
-
-            }else{*/
-                //console.log('else girdi!!');
-                /* Eğer mac adresi herhangi bir panelid le eşleşmiyorsa veritabanından panelidyi kontrol edip macToPanelId dizisine değeri tanımlıyor*/
-                /*if(!macToPanelId[veriler.macAddr]){
-
-                    Panel.findOne({macAddr: veriler.macAddr}, function(err, res){
-
-                        if(err) {
-                            console.error(err);
-                        } else {
-                            macToPanelId[veriler.macAddr] = res._id;
-                            console.log(veriler.macAddr+' mac adresi ' + res._id + ' panelId\'si ile eşleştirildi.');
-                        }
-                    });
-
-                }else{*/
+        socket.on('testVerileri', function(veriler){
+          console.log(veriler);
 
                   PanelData.create({
-                      panelId     : veriler.panelId, //veriler.panelId,
-                      akim        : veriler.akim,
-                      gerilim     : veriler.gerilim,
-                      sicaklik    : veriler.sicaklik,
-                      nem         : veriler.nem,
+                      panelId     : new ObjectId(veriler.panelId), //veriler.panelId,
+                      current        : veriler.akim,
+                      voltage     : veriler.gerilim,
+                      light    : veriler.light,
+                      temperature: veriler.sicaklik,
+                      moisture         : veriler.nem,
                       date        : new Date()
-                  }).exec(function (err, newPanelData) {
-                      if (err) return res.negotiate(err);
+                  }).exec(function(err, newPanelData)
+                  {
+                      if (err)
+                      console.log(err);
+                      else
+                      console.log("kaydedildi!");
 
-                      //console.log("kaydedildi!");
                       //io.emit('retrievePanelData', newPanelData);
                   });
 
-                //}
-
-            //}
         });
 
 
