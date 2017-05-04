@@ -51,6 +51,7 @@ manageRender:function (req, res) {
 */
     //event
     var manager = new events.EventEmitter();
+    manager.setMaxListeners(0);
     var creationStatus = false;
     var sendPanelData = null;
 

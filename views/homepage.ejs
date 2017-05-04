@@ -11,8 +11,8 @@
     <script src="/js/jquery-ui-1.11.4/external/jquery/jquery.js"></script>
     <script src="/js/jquery-ui-1.11.4/jquery-ui.min.js"></script>
     <script src="/js/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/js/highcharts/js/highcharts.js"></script>
-    <script src="/js/highcharts/js/highcharts-more.js"></script>
+
+    <script src="/js/highstock.js"></script>
 
 
     <style>
@@ -545,8 +545,68 @@
     //series2.setData(pointArr2, true, false, true);
     //series3.setData(pointArr3, true, false, true);
     //series4.setData(pointArr4, true, false, true);
-    $('#chartDetailsDiv').highcharts({
+
+
+    Highcharts.stockChart('chartDetailsDiv', {
+      chart: {
+          renderTo: 'chartDetailsDiv',
+          type: 'spline',
+          animation: Highcharts.svg,
+          //ignoreHiddenSeries: true,
+          height: 400,
+          inverted: false // "true" is not supported in Highstock
+      },
+      title: { startOnTick: false, // only when navigator enabled
+              endOnTick: false,
+        text: 'Detaylı Takip'},
+      xAxis: {type: 'datetime'},
+      yAxis: {title: {text: 'Değer'}},
+      plotOptions: {spline:
+                      {lineWidth: 3,
+                        marker: {enabled: false},
+                      },
+      },
+
+      rangeSelector : {
+              enabled: false
+      },
+      tooltip: {
+          formatter: function () {
+              return 'Tarih : '+Highcharts.dateFormat('%d-%m-%Y %H:%M:%S', this.x) + '<br/>'
+                      + 'Değer: ' + Highcharts.numberFormat(this.y, 2);
+          }
+          //pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} </b><br/>',
+      },
+      series: [
+        {
+          name: 'Akım',
+          visible: true,
+          data: pointArr.sort(function(a,b) { return a[0] - b[0]; }),
+          showInNavigator: true
+      }, {
+          name: 'Gerilim',
+          visible: true,
+          data: pointArr2.sort(function(a,b) { return a[0] - b[0]; }),
+          showInNavigator: true
+      }, {
+          name: 'Sıcaklık',
+          visible: true,
+          data: pointArr3.sort(function(a,b) { return a[0] - b[0]; }),
+          showInNavigator: true
+      }, {
+          name: 'Nem',
+          visible: true,
+          data: pointArr4.sort(function(a,b) { return a[0] - b[0]; }),
+          showInNavigator: true
+      }],
+      legend: {
+          enabled: true
+      }
+    });
+
+    /*$('#chartDetailsDiv').highcharts({
         chart: {
+            renderTo: 'container',
             type: 'spline',
             animation: Highcharts.svg,
             //ignoreHiddenSeries: true,
@@ -562,16 +622,10 @@
                         {lineWidth: 3,
                           marker: {enabled: false},
                         },
-                      series: {
-                              showInNavigator: true
-            }
         },
 
-        scrollbar: {
-            enabled: true
-        },
-        rangeSelector: {
-            enabled: true
+        rangeSelector : {
+                enabled: false
         },
         tooltip: {
             formatter: function () {
@@ -580,27 +634,32 @@
             }
             //pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} </b><br/>',
         },
-        series: [{
+        series: [
+          {
             name: 'Akım',
             visible: true,
-            data: pointArr.sort(function(a,b) { return a[0] - b[0]; })
+            data: pointArr.sort(function(a,b) { return a[0] - b[0]; }),
+            showInNavigator: true
         }, {
             name: 'Gerilim',
             visible: true,
-            data: pointArr2.sort(function(a,b) { return a[0] - b[0]; })
+            data: pointArr2.sort(function(a,b) { return a[0] - b[0]; }),
+            showInNavigator: true
         }, {
             name: 'Sıcaklık',
             visible: true,
-            data: pointArr3.sort(function(a,b) { return a[0] - b[0]; })
+            data: pointArr3.sort(function(a,b) { return a[0] - b[0]; }),
+            showInNavigator: true
         }, {
             name: 'Nem',
             visible: true,
-            data: pointArr4.sort(function(a,b) { return a[0] - b[0]; })
+            data: pointArr4.sort(function(a,b) { return a[0] - b[0]; }),
+            showInNavigator: true
         }],
         legend: {
             enabled: true
         }
-    });
+    });*/
   }
 
   socket.on('allShowDataListen', function (retData) {
