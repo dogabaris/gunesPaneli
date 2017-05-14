@@ -11,7 +11,6 @@ module.exports.cron = {
       var d_nem  = 30;
       var d_ligh = 25;
 
-
       function rand(sayi){
 
         if(sayi > 100) return 100;

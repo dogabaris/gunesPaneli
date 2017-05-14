@@ -62,7 +62,7 @@ module.exports.connections = {
      port: 27017,
      user: null, //optional
      password: null, //optional
-     database: 'GunesPaneli2' //optional
+     database: 'GunesPaneli5' //optional
    },
 
   /***************************************************************************

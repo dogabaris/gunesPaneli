@@ -13,7 +13,8 @@ module.exports = {
   attributes: {
     panelId: {
       //type: 'json', //otomatik veri ekleneceğinde kullanılan format
-      type: 'objectid',
+      type: 'string',
+      //type: 'objectid',
       required: true
     },
     current: {

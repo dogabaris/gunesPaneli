@@ -16,9 +16,9 @@ module.exports = {
             if(err) {
                 console.error(err);
             }
-            console.log(paneldatas);
+
             io.emit('addPanelDataList', !err ? paneldatas : []);
-            //console.log(paneldatas);
+
         };
 
         var callBackForWithDetails = function(err, paneldatas) {
@@ -27,11 +27,21 @@ module.exports = {
             }
 
             io.emit('addPanelDataDetailList', !err ? paneldatas : []);
-            //console.log(paneldatas);
+
+        };
+
+        var callBackForAnlik = function(err, paneldatas) {
+            if(err) {
+                console.error(err);
+            }
+
+            console.log(paneldatas);
+
+            io.emit('showAnlikBaslangic', !err ? paneldatas : []);
+
         };
 
         socket.on('retrievePanelDataWithDate', function (panelId, date, nextDate) {
-          console.log(panelId);
 
             PanelData.find({
                 panelId: panelId,
@@ -56,6 +66,47 @@ module.exports = {
 
         });
 
+        socket.on('retrieveBaslangicPanelDataAnlik', function (panelId, date) { //Anlık verileri gönderir.
+
+            PanelData.find({
+                panelId: panelId,
+                date: {
+                    $gte: date,//greater and equal
+                }
+            }, callBackForAnlik);
+
+
+        });
+
+        socket.on('retrievePanelDataAnlik', function (panelId, anlikDate) { //Anlık verileri gönderir.
+
+            PanelData.find({
+                panelId: panelId,
+                date: { '>=': anlikDate }
+            }, callBackForAnlik);
+
+            /*PanelData.native(function(err, panelCollection) {//SAILSTE AGGREGATE KULLANIMI İÇİN
+              if (err) return res.serverError(err);
+
+                panelCollection.find([
+                  {
+                    $match: {
+                        panelId: panelId,
+                        day: date
+                        //panelId: "56eb3d5d7c727d861b3278ec"
+                    }
+                  },
+                ],
+                  function (err, ret) {
+                        //console.log("******** " + ret);
+                        if (err) return res.serverError(err);
+                        //console.log(date);
+                        io.emit('showAnlik', ret);
+                  });
+
+            });*/
+        });
+
         var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
         socket.on('retrievePanelDataWithDateYears', function (panelId, date) { //Verilen gün yıllara göre ortalamalarını gösterir.
@@ -73,7 +124,7 @@ module.exports = {
                   },
                   {
                     $match: {
-                        panelId: ObjectId(panelId),
+                        panelId: panelId,
                         day: date
                         //panelId: "56eb3d5d7c727d861b3278ec"
                     }
@@ -98,8 +149,6 @@ module.exports = {
 
                 });
         });
-
-
 
 
     });

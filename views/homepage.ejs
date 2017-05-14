@@ -74,12 +74,13 @@
 
       </div>
       <div class="col-md-8">
-        <h4 id="chartTitle">Son 1 Dakika</h4>
+        <h4 id="chartTitle"></h4>
         <div id="chartDiv"></div>
         <div id="chartOldDataDiv" style="display:none;"></div>
         <div id="chartOldDataYearsDiv" style="display:none;"></div>
         <div id="chartOldDataAllYearsDiv" style="display:none;"></div>
         <div id="chartDetailsDiv" style="display:none;"></div>
+        <div id="chartAnlikDiv" style="display:none;"></div>
       </div>
     </div>
   </div>
@@ -138,7 +139,7 @@
       if (!chart) {
           chart = getChart();
       }
-      //console.log(panelData);
+
       if (chart) {
           updateChartWithCurrentData(panelData);
       }
@@ -170,7 +171,8 @@
       row += '<button type="button" data-toggle="tooltip" title="Aylar!" class="gecmis btn btn-default btn-xs gecmis-'+panel.id+'" onClick="allDataShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-signal"></span></button>';
       row += '<button type="button" data-toggle="tooltip" title="Günün yıllara oranı!" class="yillik btn btn-default btn-xs yillik-'+panel.id+'" id="' + panel.id + '_showYears" style="margin-left:5px;"><span class="glyphicon glyphicon-search"></span></button>';
       row += '<button type="button" data-toggle="tooltip" title="Yıllar!" class="yillar btn btn-default btn-xs yillar-'+panel.id+'" onClick="allDataAllYearsShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-calendar"></span></button>';
-      row += '<button type="button" data-toggle="tooltip" title="Zaman Aralığı!" class="detayli btn btn-default btn-xs detayli-'+panel.id+'" onClick="allDataDetailsShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-time"></span></button></td>';
+      row += '<button type="button" data-toggle="tooltip" title="Zaman Aralığı!" class="detayli btn btn-default btn-xs detayli-'+panel.id+'" onClick="allDataDetailsShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-time"></span></button>';
+      row += '<button type="button" data-toggle="tooltip" title="Anlık!" class="dinamik btn btn-default btn-xs dinamik-'+panel.id+'" onClick="anlikShow(\'' + panel.id + '\')" style="margin-left:5px;"><span class="glyphicon glyphicon-hourglass"></span></button></td>';
       row += '</tr>';
       $('#panelTable').find('> tbody:last-child').append(row);
       $('#' + panel.id + '_show').click(function () {//bir günü özel olarak incelemek için
@@ -196,6 +198,8 @@
       if(!showCurrent) {
           var selectedDate = new Date($('#datetimepicker').datepicker( "getDate" ));
           var nextDay = addDays(selectedDate, 1);
+          console.log(selectedDate + " " + nextDay);
+
 
           socket.emit('retrievePanelDataWithDate', selectedPanelId, selectedDate, nextDay);
       }
@@ -209,6 +213,7 @@
       $('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.detayli').removeClass('btn-success').addClass('btn-default');
+      $('#panelTable').find('button.dinamik').removeClass('btn-success').addClass('btn-default');
       $('button.yillik-'+panel.id).removeClass('btn-default').addClass('btn-success');
 
       selectedPanelId = panel.id;
@@ -216,13 +221,10 @@
       selectedDate = new Date($('#datetimepicker').datepicker( "getDate" ));
       //var date = $(this).datepicker('getDate');
       day  = selectedDate.getDate();
-      //console.log(day);
       //var nextDay = addDays(selectedDate, 1);
       if(day != null){
         socket.emit('retrievePanelDataWithDateYears', selectedPanelId, day);
       }
-
-
   }
 
   function clearChart() {
@@ -231,11 +233,13 @@
       $('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.yillar').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.detayli').removeClass('btn-success').addClass('btn-default');
+      $('#panelTable').find('button.dinamik').removeClass('btn-success').addClass('btn-default');
       $('#chartDiv').css('display', 'block');
       $('#chartTitle').css('display','block');
       $('#chartOldDataDiv').css('display', 'none');
       $('#chartOldDataYearsDiv').css('display', 'none');
       $('#chartDetailsDiv').css('display','none');
+      $('#chartAnlikDiv').css('display','none');
 
       if (!chart) {
           chart = getChart();
@@ -387,22 +391,10 @@
       }
   });
 
-  /* Veriler anlık görüntülenmek isteniyorsa bu fonksiyon çağırılıyor. */
-  $.datepicker._gotoToday = function() {
-      clearChart();
-
-      var chartTitle = document.getElementById('chartTitle');
-      chartTitle.innerHTML = 'Son 5 Dakika';
-
-      showCurrent = true;
-  }
-
   /* Geçmişe dönük kayıtlar görüntülenmek isteniyorsa bu fonk. çağırılıyor. */
   $('#datetimepicker').datepicker({
       useCurrent: false,
       maxDate: 0,
-      currentText: 'Anlık Durum',
-      showButtonPanel: true,
       onSelect: function (dateText) {
           if (selectedPanelId != null) {
 
@@ -416,13 +408,7 @@
               var date = $(this).datepicker('getDate');
               day  = date.getDate();
 
-              //console.log("Gün = " + day);
-
-              //chartTitle.innerHTML = $.datepicker.formatDate('dd.mm.yy', selectedDate);
-              //console.log(selectedDate);
-
               socket.emit('retrievePanelDataWithDateYears', selectedPanelId, day);
-              //console.log(selectedPanelId);
 
             }else{ // Eskiye dönük özel olarak bir günün içeriği görüntülenmek istenirse burası çalıştırılır.
               clearChart();
@@ -437,7 +423,7 @@
               chartTitle.innerHTML = $.datepicker.formatDate('dd.mm.yy', selectedDate);
 
               socket.emit('retrievePanelDataWithDate', selectedPanelId, selectedDate, nextDay);
-              //console.log(selectedPanelId);
+
             }
 
 
@@ -452,6 +438,7 @@
       $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.yillar').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.detayli').removeClass('btn-success').addClass('btn-default');
+      $('#panelTable').find('button.dinamik').removeClass('btn-success').addClass('btn-default');
       $('button.gecmis-'+panelId).removeClass('btn-default').addClass('btn-success');
 
       $('#chartTitle').css('display','none');
@@ -472,6 +459,7 @@
       $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.yillar').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.detayli').removeClass('btn-success').addClass('btn-default');
+      $('#panelTable').find('button.dinamik').removeClass('btn-success').addClass('btn-default');
       $('button.yillar-'+panelId).removeClass('btn-default').addClass('btn-success');
 
       $('#chartTitle').css('display','none');
@@ -484,6 +472,115 @@
       socket.emit('allDataAllYearsShow', panelId, false);
   }
 
+  function anlikShow(panelId) {//Anlık inceleme
+
+      $('#panelTable').find('button.anlik').removeClass('btn-success').addClass('btn-default');
+      $('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
+      $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
+      $('#panelTable').find('button.yillar').removeClass('btn-success').addClass('btn-default');
+      $('#panelTable').find('button.detayli').removeClass('btn-success').addClass('btn-default');
+      $('#panelTable').find('button.dinamik').removeClass('btn-success').addClass('btn-default');
+      $('button.dinamik-'+panelId).removeClass('btn-default').addClass('btn-success');
+
+      $('#chartTitle').css('display','none');
+      $('#chartDiv').css('display','none');
+      $('#chartOldDataDiv').css('display','none');
+      $('#chartOldDataYearsDiv').css('display','none');
+      $('#chartOldDataAllYearsDiv').css('display','none');
+      $('#chartDetailsDiv').css('display','none');
+      $('#chartAnlikDiv').css('display','block');
+
+      var today = new Date();
+
+      console.log(today);
+
+      socket.emit('retrieveBaslangicPanelDataAnlik', panelId, today);
+
+      var akim,gerilim,sicaklik,nem;
+
+      socket.on('showAnlikBaslangic', function (retData) {
+        console.log(retData);
+         akim=retData.current;
+         gerilim=retData.voltage;
+         sicaklik=retData.temperature;
+         nem=retData.moisture;
+      });
+
+      $('#chartAnlikDiv').highcharts({
+          chart: {
+              title:'Canlı',
+              type: 'spline',
+              animation: Highcharts.svg,
+              marginRight: 10,
+              //height: 400
+              events: {
+               load: function () {
+                   var series0 = this.series[0];
+                   var series1 = this.series[1];
+                   var series2 = this.series[2];
+                   var series3 = this.series[3];
+
+                   /*setInterval(function () {
+
+
+                     socket.emit('retrievePanelDataAnlik', panelId, new Date());
+
+                      //console.log(new Date());
+
+                       var x = new Date(); // şu an
+                        //   y = Math.random();
+                        socket.on('showAnlik', function (retData) {
+                          //console.log(retData);
+                           akim=retData.current;
+                           gerilim=retData.voltage;
+                           sicaklik=retData.temperature;
+                           nem=retData.moisture;
+                        });
+
+                       series0.addPoint([x, akim], true, true);
+                       series1.addPoint([x, gerilim], true, true);
+                       series2.addPoint([x, sicaklik], true, true);
+                       series3.addPoint([x, nem], true, true);
+                   }, 1000);*/
+               }
+             }
+          },
+          title: {text: ''},
+          xAxis: {type: 'datetime',
+                  tickPixelInterval: 150},
+          yAxis: {title: {text: 'Değer'}},
+          plotOptions: {spline: {lineWidth: 3, marker: {enabled: false},}},
+          tooltip: {
+              formatter: function () {
+                  return 'Tarih : '+Highcharts.dateFormat('%d-%m-%Y %H:%M:%S', this.x) + '<br/>'
+                          + 'Değer: ' + Highcharts.numberFormat(this.y, 2);
+              }
+          },
+          series: [{
+              name: 'Akım',
+              visible: true,
+              data:akim
+          }, {
+              name: 'Gerilim',
+              visible: true,
+              data:gerilim
+          }, {
+              name: 'Sıcaklık',
+              visible: true,
+              data:sicaklik
+          }, {
+              name: 'Nem',
+              visible: true,
+              data:nem
+          }],
+          legend: {
+              enabled: true
+          }
+      });
+
+
+  }
+
 
   function allDataDetailsShow(panelId) {//Detaylı inceleme
 
@@ -492,6 +589,7 @@
       $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.yillar').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.detayli').removeClass('btn-success').addClass('btn-default');
+      $('#panelTable').find('button.dinamik').removeClass('btn-success').addClass('btn-default');
       $('button.detayli-'+panelId).removeClass('btn-default').addClass('btn-success');
 
       $('#chartTitle').css('display','none');
@@ -499,6 +597,7 @@
       $('#chartOldDataDiv').css('display','none');
       $('#chartOldDataYearsDiv').css('display','none');
       $('#chartOldDataAllYearsDiv').css('display','none');
+      $('#chartAnlikDiv').css('display','none');
       $('#chartDetailsDiv').css('display','block');
 
 
@@ -760,8 +859,8 @@
     $('#chartOldDataYearsDiv').css('display','block');
     $('#chartOldDataAllYearsDiv').css('display','none');
     $('#chartDetailsDiv').css('display','none');
+    $('#chartAnlikDiv').css('display','none');
 
-      //console.log(retData);
       var chartDataYears = [];
       var akim = [];
       var gerilim = [];
@@ -772,7 +871,7 @@
 
       for (var i in retData) {
 
-          //console.log(selectedDate.getDate());
+
 
           akim[i] = retData[i].ortAkim;
           gerilim[i] = retData[i].ortGerilim;
@@ -788,7 +887,6 @@
 
       }
 
-      //console.log(retData);
 
       $('#chartOldDataYearsDiv').highcharts({
 
@@ -855,8 +953,9 @@
     $('#chartOldDataYearsDiv').css('display','none');
     $('#chartOldDataAllYearsDiv').css('display','block');
     $('#chartDetailsDiv').css('display','none');
+    $('#chartAnlikDiv').css('display','none');
 
-      //console.log(retData);
+
       var chartDataYears = [];
       var akim = [];
       var gerilim = [];
@@ -867,7 +966,6 @@
 
       for (var i in retData) {
 
-          //console.log(selectedDate.getDate());
 
           akim[i] = retData[i].ortAkim;
           gerilim[i] = retData[i].ortGerilim;
@@ -883,7 +981,6 @@
 
       }
 
-      //console.log(retData);
 
       $('#chartOldDataAllYearsDiv').highcharts({
 

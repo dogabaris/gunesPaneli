@@ -256,16 +256,18 @@ manageRender:function (req, res) {
         * */
         var macToPanelId = {};
 
+        var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID; //panel ObjectId'ye dönüştürülmesi gerekiyor Mongoda ObjectId olarak tutulduğu için
+
         socket.on('testVerileri', function(veriler){
-          console.log(veriler);
+          //console.log(veriler);
 
                   PanelData.create({
-                      panelId     : new ObjectId(veriler.panelId), //veriler.panelId,
-                      current        : veriler.akim,
-                      voltage     : veriler.gerilim,
+                      panelId     : veriler.panelId, //new ObjectId(veriler.panelId) veriler.panelId
+                      current        : veriler.current,
+                      voltage     : veriler.voltage,
                       light    : veriler.light,
-                      temperature: veriler.sicaklik,
-                      moisture         : veriler.nem,
+                      temperature: veriler.temperature,
+                      moisture         : veriler.moisture,
                       date        : new Date()
                   }).exec(function(err, newPanelData)
                   {
@@ -315,7 +317,8 @@ manageRender:function (req, res) {
                               });*/
 
 
-        var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID; //panel ObjectId'ye dönüştürülmesi gerekiyor Mongoda ObjectId olarak tutulduğu için
+
+
 
         socket.on('allDataShow', function(panel){
 
@@ -327,7 +330,7 @@ manageRender:function (req, res) {
             panelCollection.aggregate([
               {
                 $match: {
-                    panelId: ObjectId(panel)
+                    panelId: panel
                     //panelId: "56eb3d5d7c727d861b3278ec"
                 }
               },
@@ -366,7 +369,7 @@ manageRender:function (req, res) {
             panelCollection.aggregate([
               {
                 $match: {
-                    panelId: ObjectId(panel)
+                    panelId: panel
                     //panelId: "56eb3d5d7c727d861b3278ec"
                 }
               },
