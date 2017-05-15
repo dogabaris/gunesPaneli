@@ -66,45 +66,35 @@ module.exports = {
 
         });
 
-        socket.on('retrieveBaslangicPanelDataAnlik', function (panelId, date) { //Anlık verileri gönderir.
+        socket.on('retrieveBaslangicPanelDataAnlik', function (panelId, today, tomorrow) { //Anlık verileri gönderir.
 
-            PanelData.find({
+            /*PanelData.find({
                 panelId: panelId,
+                date: { '>=': today }
                 date: {
-                    $gte: date,//greater and equal
+                    $gte: today,//greater and equal
+                    $lt: tomorrow//lesser than
                 }
-            }, callBackForAnlik);
+            }, callBackForAnlik);*/
+
+            PanelData.find({panelId: panelId}).sort('date DESC').limit(1).where({ "date" : { ">=" : today, "<" : tomorrow }})
+              .exec(function (err, paneldatas) {
+                console.log(paneldatas);
+
+                io.emit('showAnlikBaslangic', !err ? paneldatas : []);
+              });
 
 
         });
 
-        socket.on('retrievePanelDataAnlik', function (panelId, anlikDate) { //Anlık verileri gönderir.
+        socket.on('retrievePanelDataAnlik', function (panelId, now,tomorrow) { //Anlık verileri gönderir.
 
-            PanelData.find({
-                panelId: panelId,
-                date: { '>=': anlikDate }
-            }, callBackForAnlik);
+            PanelData.find({panelId: panelId}).sort('date DESC').limit(1).where({ "date" : { ">=" : now, "<" : tomorrow }})
+            .exec(function (err, paneldatas) {
+              console.log(paneldatas);
 
-            /*PanelData.native(function(err, panelCollection) {//SAILSTE AGGREGATE KULLANIMI İÇİN
-              if (err) return res.serverError(err);
-
-                panelCollection.find([
-                  {
-                    $match: {
-                        panelId: panelId,
-                        day: date
-                        //panelId: "56eb3d5d7c727d861b3278ec"
-                    }
-                  },
-                ],
-                  function (err, ret) {
-                        //console.log("******** " + ret);
-                        if (err) return res.serverError(err);
-                        //console.log(date);
-                        io.emit('showAnlik', ret);
-                  });
-
-            });*/
+              io.emit('showAnlik', !err ? paneldatas : []);
+            });
         });
 
         var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;

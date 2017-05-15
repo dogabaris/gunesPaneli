@@ -491,28 +491,21 @@
       $('#chartAnlikDiv').css('display','block');
 
       var today = new Date();
+      var tomorrow = new Date();
+      var yesterday = new Date();
+      tomorrow.setDate(tomorrow.getDate()+1);
+      yesterday.setDate(yesterday.getDate()-1);
 
-      console.log(today);
-
-      socket.emit('retrieveBaslangicPanelDataAnlik', panelId, today);
-
-      var akim,gerilim,sicaklik,nem;
-
-      socket.on('showAnlikBaslangic', function (retData) {
-        console.log(retData);
-         akim=retData.current;
-         gerilim=retData.voltage;
-         sicaklik=retData.temperature;
-         nem=retData.moisture;
-      });
+      var akim = [];
+      var gerilim = [];
+      var sicaklik = [];
+      var nem = [];
 
       $('#chartAnlikDiv').highcharts({
           chart: {
-              title:'Canlı',
               type: 'spline',
               animation: Highcharts.svg,
               marginRight: 10,
-              //height: 400
               events: {
                load: function () {
                    var series0 = this.series[0];
@@ -520,34 +513,52 @@
                    var series2 = this.series[2];
                    var series3 = this.series[3];
 
-                   /*setInterval(function () {
+                   series0.setData([today, 0], true, true);
+                   series1.setData([today, 0], true, true);
+                   series2.setData([today, 0], true, true);
+                   series3.setData([today, 0], true, true);
 
+                   setInterval(function () {
+                     //var now = new Date();
 
-                     socket.emit('retrievePanelDataAnlik', panelId, new Date());
+                     socket.emit('retrievePanelDataAnlik', panelId, today , tomorrow);
 
-                      //console.log(new Date());
-
-                       var x = new Date(); // şu an
-                        //   y = Math.random();
                         socket.on('showAnlik', function (retData) {
-                          //console.log(retData);
-                           akim=retData.current;
-                           gerilim=retData.voltage;
-                           sicaklik=retData.temperature;
-                           nem=retData.moisture;
-                        });
+                          console.log(retData);
 
-                       series0.addPoint([x, akim], true, true);
-                       series1.addPoint([x, gerilim], true, true);
-                       series2.addPoint([x, sicaklik], true, true);
-                       series3.addPoint([x, nem], true, true);
-                   }, 1000);*/
+                          for (var i in retData) {
+                              akim[i] = retData[i].current;
+                              gerilim[i] = retData[i].voltage;
+                              sicaklik[i] = retData[i].temperature;
+                              nem[i] = retData[i].moisture;
+                              //if(i>1){
+                                series0.addPoint([today, akim[i]], true, true);
+                                series1.addPoint([today, gerilim[i]], true, true);
+                                series2.addPoint([today, sicaklik[i]], true, true);
+                                series3.addPoint([today, nem[i]], true, true);
+                              /*}else{
+                                series0.setData([today, akim[i]], true, true);
+                                series1.setData([today, gerilim[i]], true, true);
+                                series2.setData([today, sicaklik[i]], true, true);
+                                series3.setData([today, nem[i]], true, true);
+                              }*/
+
+                          }
+                           /*var akim=retData.current;
+                           var gerilim=retData.voltage;
+                           var sicaklik=retData.temperature;
+                           var nem=retData.moisture;*/
+
+                         });
+
+                   }, 3000);
                }
              }
           },
-          title: {text: ''},
+          title: {text: 'Canlı'},
           xAxis: {type: 'datetime',
-                  tickPixelInterval: 150},
+                  tickInterval: 24 * 3600 * 1000
+                },
           yAxis: {title: {text: 'Değer'}},
           plotOptions: {spline: {lineWidth: 3, marker: {enabled: false},}},
           tooltip: {
@@ -556,26 +567,26 @@
                           + 'Değer: ' + Highcharts.numberFormat(this.y, 2);
               }
           },
+          legend: {
+              enabled: true
+          },
           series: [{
               name: 'Akım',
               visible: true,
-              data:akim
+              data:[]
           }, {
-              name: 'Gerilim',
-              visible: true,
-              data:gerilim
+            name: 'Gerilim',
+            visible: true,
+            data:[]
           }, {
-              name: 'Sıcaklık',
-              visible: true,
-              data:sicaklik
+            name: 'Sıcaklık',
+            visible: true,
+            data:[]
           }, {
-              name: 'Nem',
-              visible: true,
-              data:nem
-          }],
-          legend: {
-              enabled: true
-          }
+            name: 'Nem',
+            visible: true,
+            data:[]
+          }]
       });
 
 
