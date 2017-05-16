@@ -30,7 +30,7 @@ module.exports = {
 
         };
 
-        var callBackForAnlik = function(err, paneldatas) {
+        var callBackForAnlikBaslangic = function(err, paneldatas) {
             if(err) {
                 console.error(err);
             }
@@ -68,22 +68,13 @@ module.exports = {
 
         socket.on('retrieveBaslangicPanelDataAnlik', function (panelId, today, tomorrow) { //Anlık verileri gönderir.
 
-            /*PanelData.find({
-                panelId: panelId,
-                date: { '>=': today }
-                date: {
-                    $gte: today,//greater and equal
-                    $lt: tomorrow//lesser than
-                }
-            }, callBackForAnlik);*/
-
-            PanelData.find({panelId: panelId}).sort('date DESC').limit(1).where({ "date" : { ">=" : today, "<" : tomorrow }})
-              .exec(function (err, paneldatas) {
-                console.log(paneldatas);
-
-                io.emit('showAnlikBaslangic', !err ? paneldatas : []);
-              });
-
+          PanelData.find({
+              panelId: panelId,
+              date: {
+                  $gte: today,//greater and equal
+                  $lt: tomorrow//lesser than
+              }
+          }, callBackForAnlikBaslangic);
 
         });
 

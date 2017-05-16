@@ -198,7 +198,6 @@
       if(!showCurrent) {
           var selectedDate = new Date($('#datetimepicker').datepicker( "getDate" ));
           var nextDay = addDays(selectedDate, 1);
-          console.log(selectedDate + " " + nextDay);
 
 
           socket.emit('retrievePanelDataWithDate', selectedPanelId, selectedDate, nextDay);
@@ -492,14 +491,25 @@
 
       var today = new Date();
       var tomorrow = new Date();
-      var yesterday = new Date();
       tomorrow.setDate(tomorrow.getDate()+1);
-      yesterday.setDate(yesterday.getDate()-1);
+      var selectedDate = new Date($('#datetimepicker').datepicker( "getDate" ));
+      var nextDay = addDays(selectedDate, 1);
 
       var akim = [];
       var gerilim = [];
       var sicaklik = [];
       var nem = [];
+
+      var pointArr = [];
+      var pointArr2 = [];
+      var pointArr3 = [];
+      var pointArr4 = [];
+
+      Highcharts.setOptions({
+        global: {
+            useUTC: false
+        }
+      });
 
       $('#chartAnlikDiv').highcharts({
           chart: {
@@ -513,67 +523,107 @@
                    var series2 = this.series[2];
                    var series3 = this.series[3];
 
-                   series0.setData([today, 0], true, true);
-                   series1.setData([today, 0], true, true);
-                   series2.setData([today, 0], true, true);
-                   series3.setData([today, 0], true, true);
+                   socket.emit('retrieveBaslangicPanelDataAnlik', panelId, selectedDate , nextDay);
+
+                   socket.on('showAnlikBaslangic', function (retData) {
+                     console.log(retData);
+
+                     for(var i = 0; i < retData.length; i++) {
+                         var panelData = retData[i];
+
+                         var x = (new Date(panelData.date)).getTime();
+                         var y = panelData["current"];
+                         pointArr.push([x, y]);
+                     }
+                     for(var i = 0; i < retData.length; i++) {
+                         var panelData = retData[i];
+
+                         var x = (new Date(panelData.date)).getTime();
+                         var y = panelData["voltage"];
+                         pointArr2.push([x, y]);
+                     }
+                     for(var i = 0; i < retData.length; i++) {
+                         var panelData = retData[i];
+
+                         var x = (new Date(panelData.date)).getTime();
+                         var y = panelData["temperature"];
+                         pointArr3.push([x, y]);
+                     }
+                     for(var i = 0; i < retData.length; i++) {
+                         var panelData = retData[i];
+
+                         var x = (new Date(panelData.date)).getTime();
+                         var y = panelData["moisture"];
+                         pointArr4.push([x, y]);
+                     }
+                     pointArr.sort(function(a,b) { return a[0] - b[0]; })
+                     pointArr2.sort(function(a,b) { return a[0] - b[0]; })
+                     pointArr3.sort(function(a,b) { return a[0] - b[0]; })
+                     pointArr4.sort(function(a,b) { return a[0] - b[0]; })
+
+                     series0.setData(pointArr, true, false, true);
+                     series1.setData(pointArr2, true, false, true);
+                     series2.setData(pointArr3, true, false, true);
+                     series3.setData(pointArr4, true, false, true);
+                    });
 
                    setInterval(function () {
-                     //var now = new Date();
-
                      socket.emit('retrievePanelDataAnlik', panelId, today , tomorrow);
 
-                        socket.on('showAnlik', function (retData) {
-                          console.log(retData);
+                   }, 1000);
 
-                          for (var i in retData) {
-                              akim[i] = retData[i].current;
-                              gerilim[i] = retData[i].voltage;
-                              sicaklik[i] = retData[i].temperature;
-                              nem[i] = retData[i].moisture;
-                              //if(i>1){
-                                series0.addPoint([today, akim[i]], true, true);
-                                series1.addPoint([today, gerilim[i]], true, true);
-                                series2.addPoint([today, sicaklik[i]], true, true);
-                                series3.addPoint([today, nem[i]], true, true);
-                              /*}else{
-                                series0.setData([today, akim[i]], true, true);
-                                series1.setData([today, gerilim[i]], true, true);
-                                series2.setData([today, sicaklik[i]], true, true);
-                                series3.setData([today, nem[i]], true, true);
-                              }*/
+                   socket.on('showAnlik', function (retData) {
+                     console.log(retData);
 
-                          }
-                           /*var akim=retData.current;
-                           var gerilim=retData.voltage;
-                           var sicaklik=retData.temperature;
-                           var nem=retData.moisture;*/
+                     for (var i in retData) {
+                         akim[i] = retData[i].current;
+                         gerilim[i] = retData[i].voltage;
+                         sicaklik[i] = retData[i].temperature;
+                         nem[i] = retData[i].moisture;
 
-                         });
+                         var x = (new Date()).getTime();
 
-                   }, 3000);
+                         series0.addPoint([x, akim[i]], true, true);
+                         series1.addPoint([x, gerilim[i]], true, true);
+                         series2.addPoint([x, sicaklik[i]], true, true);
+                         series3.addPoint([x, nem[i]], true, true);
+                     }
+
+                    });
                }
              }
           },
           title: {text: 'Canlı'},
           xAxis: {type: 'datetime',
-                  tickInterval: 24 * 3600 * 1000
+                  tickPixelInterval: 150
+                  //tickInterval: 24 * 3600 * 1000
                 },
-          yAxis: {title: {text: 'Değer'}},
+          yAxis: {title: {
+                          text: 'Değer'
+                      },
+                  plotLines: [{
+                  value: 0,
+                  width: 1,
+                  color: '#808080'
+                    }]
+                },
           plotOptions: {spline: {lineWidth: 3, marker: {enabled: false},}},
           tooltip: {
               formatter: function () {
-                  return 'Tarih : '+Highcharts.dateFormat('%d-%m-%Y %H:%M:%S', this.x) + '<br/>'
+                  return 'Tarih : '+ Highcharts.dateFormat('%d-%m-%Y %H:%M:%S', this.x) + '<br/>'
                           + 'Değer: ' + Highcharts.numberFormat(this.y, 2);
               }
           },
           legend: {
               enabled: true
           },
+          exporting: {
+            enabled: false
+          },
           series: [{
-              name: 'Akım',
-              visible: true,
-              data:[]
+            name: 'Akım',
+            visible: true,
+            data:[]
           }, {
             name: 'Gerilim',
             visible: true,
