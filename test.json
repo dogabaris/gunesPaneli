@@ -1,16 +1,16 @@
 [ {
- "SMA.h.On":   2183,
-"TmpMdul.C": 7.4734,
-"TmpAmb.C": -273.1,
-"WindVel.m.s": 0.31992,
-"IntSolIrr": 118.33 
-},
-{
  "SMA.h.On": 3586.2,
 "TmpMdul.C": 9.9817,
 "TmpAmb.C": -273.1,
 "WindVel.m.s": 0.39294,
 "IntSolIrr": 142.61 
+},
+{
+ "SMA.h.On":   2183,
+"TmpMdul.C": 7.4734,
+"TmpAmb.C": -273.1,
+"WindVel.m.s": 0.31992,
+"IntSolIrr": 118.33 
 },
 {
  "SMA.h.On":  818.6,
