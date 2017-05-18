@@ -8,12 +8,9 @@ library(RJSONIO)
 
 library(ggplot2) # grafik
 
-print('hello')
-
 mongo <- mongoDbConnect(dbName = "yeniveri", host="localhost", port = "27017") 
 
 deneme <- dbGetQuery(mongo, "veri", "",0,50000) #nosql sorgu üret
-
 
 veriCluster <- kmeans(deneme[,c(26,28,50,52,39)], 3, nstart = 40) 
 veriCluster #yazdırdı
