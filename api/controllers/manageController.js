@@ -8,47 +8,6 @@ manageRender:function (req, res) {
     var events = require('events');
     var mongoose = require('mongoose');
 
-    //db
-    //var Panel = mongoose.model('Panel');
-    //var PanelData = mongoose.model('PanelData');
-
-    //route
-    //var router = express.Router();
-
-    //router.get('/', function (req, res, next) {
-    //    res.render('manage', {message: ''});
-    //});
-
-/*
-    router.get('/veri_kaydet', function (req, res, next) {
-
-        if((req.query.panelId).length > 3){
-
-            var newPanelData = new PanelData({
-                panelId: req.query.panelId,
-                current: req.query.akim,
-                voltage: req.query.gerilim,
-                light: 0,
-                temperature: req.query.sicaklik,
-                moisture: req.query.nem,
-                date: new Date()
-            });
-
-            newPanelData.save(function(err){
-                if(err) {
-                    console.error(err);
-                }
-            });
-
-            io.emit('retrievePanelData', newPanelData);
-
-            res.render('OK');
-        }else{
-            res.render('error',{message: 'parametreler eksik.',error:{status:'500', stack:'ee'}});
-        }
-        //res.render('manage', {message: ''});
-    });
-*/
     //event
     var manager = new events.EventEmitter();
     manager.setMaxListeners(0);

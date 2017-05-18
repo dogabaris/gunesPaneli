@@ -107,7 +107,7 @@
   var Series = {akim:{series: 0}, gerilim: {series: 1}, sicaklik: {series: 2}, nem: {series: 3}};
   var dataListOfTheHistorical = [];
   var dataListOfTheDetail = [];
-
+  var Interval;
   var socket = io();
 
 
@@ -206,7 +206,7 @@
   /* Yıllık verileri gösterilecek panelleri seçiyoruz */
   function showPanelDetailYears(panel) {
       //clearChart();
-
+      clearInterval(Interval);
       $('#panelTable').find('button.yillar').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.anlik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
@@ -227,7 +227,7 @@
   }
 
   function clearChart() {
-
+      clearInterval(Interval);
       $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.yillar').removeClass('btn-success').addClass('btn-default');
@@ -431,7 +431,7 @@
   });
 
   function allDataShow(panelId) {
-
+      clearInterval(Interval);
       $('#panelTable').find('button.anlik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
@@ -452,7 +452,7 @@
   }
 
   function allDataAllYearsShow(panelId) {
-
+    clearInterval(Interval);
       $('#panelTable').find('button.anlik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
@@ -472,7 +472,7 @@
   }
 
   function anlikShow(panelId) {//Anlık inceleme
-
+    clearInterval(Interval);
       $('#panelTable').find('button.anlik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
@@ -529,7 +529,7 @@
                    socket.emit('retrieveBaslangicPanelDataAnlik', panelId, selectedDate , nextDay);
 
                    socket.on('showAnlikBaslangic', function (retData) {
-                     console.log(retData);
+                     //console.log(retData);
 
                      for(var i = 0; i < retData.length; i++) {
                          var panelData = retData[i];
@@ -570,13 +570,13 @@
                      series3.setData(pointArr4, true, false, true);
                     });
 
-                   setInterval(function () {
+                   Interval = setInterval(function () {
                      socket.emit('retrievePanelDataAnlik', panelId, today , tomorrow);
 
                    }, 1000);
 
                    socket.on('showAnlik', function (retData) {
-                     console.log(retData);
+                     //console.log(retData);
 
                      for (var i in retData) {
                          akim[i] = retData[i].current;
@@ -650,7 +650,7 @@
 
 
   function allDataDetailsShow(panelId) {//Detaylı inceleme
-
+    clearInterval(Interval);
       $('#panelTable').find('button.anlik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.yillik').removeClass('btn-success').addClass('btn-default');
       $('#panelTable').find('button.gecmis').removeClass('btn-success').addClass('btn-default');
@@ -862,7 +862,7 @@
 
 
   socket.on('allShowDataListenYears', function (retData) {
-
+    clearInterval(Interval);
     $('#chartTitle').css('display','none');
     $('#chartDiv').css('display','none');
     $('#chartOldDataDiv').css('display','none');
@@ -956,7 +956,7 @@
   });
 
   socket.on('allShowDataListenAllYears', function (retData) {
-
+    clearInterval(Interval);
     $('#chartTitle').css('display','none');
     $('#chartDiv').css('display','none');
     $('#chartOldDataDiv').css('display','none');

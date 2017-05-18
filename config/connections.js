@@ -20,7 +20,7 @@
  */
 
 module.exports.connections = {
-
+  hookTimeout: 80000,
   /***************************************************************************
   *                                                                          *
   * Local disk storage for DEVELOPMENT ONLY                                  *
@@ -58,10 +58,12 @@ module.exports.connections = {
   ***************************************************************************/
    mongodb: {
      adapter: 'sails-mongo',
+     //host: process.env.MONGO_PORT_27017_TCP_ADDR,
+     // port: process.env.MONGO_PORT_27017_TCP_PORT,
      host: 'localhost',
      port: 27017,
-     user: null, //optional
-     password: null, //optional
+    // user: null, //optional
+     //password: null, //optional
      database: 'GunesPaneli5' //optional
    },
 
