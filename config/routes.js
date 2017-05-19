@@ -36,7 +36,7 @@ module.exports.routes = {
   '/': 'indexController.indexRender',
   '/manage': 'manageController.manageRender',
   '/webhook': 'apiController.webhook',
-
+  '/access-token': 'apiController.accesstoken',
   //'post /home/new': 'UserController.new',
   //'post /home/update': 'UserController.update'
 
