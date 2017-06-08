@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Güneş Paneli Takip Sistemi</title>
+    <title>Güneş Paneli Gözlem Sistemi</title>
     <link rel="stylesheet" href="/js/stylesheets/style.css">
     <link rel="stylesheet" href="/js/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="/js/jquery-ui-1.11.4/jquery-ui.min.css">
@@ -24,7 +24,7 @@
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header"><a href="/" class="navbar-brand">
-            Güneş Paneli Takip Sistemi
+            Güneş Paneli Gözlem Sistemi
             </a></div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
@@ -32,6 +32,7 @@
             <li id="managePanel"><a href="manage">
                 Panel Yönetimi
                 </a></li>
+            <li id="statisticPanel" ><a href="/statistics">İstatistikler</a></li>
           </ul>
         </div>
       </div>
@@ -115,8 +116,26 @@
       $('[data-toggle="tooltip"]').tooltip();
   });
 
+  $(document).ready(function(){
+      socket.emit('retrievePanelList', 0, false);//panel listesini getirir
+      socket.on('retrievePanelList', function (panelList) {
+        //console.log(panelList);
+          $('#panelTable').find('> tbody > tr').remove();
+
+          for (var i = 0; i < panelList.length; i++) {
+              if (panelList[i].status) {
+
+                  addPanelToTable(i, panelList[i]);
+              }
+          }
+      });
+  });
+
+  socket.emit('retrievePanelList', 0, false);//panel listesini getirir
+
   /* Panelleri bu fonksiyon listeliyor. */
   socket.on('retrievePanelList', function (panelList) {
+    //console.log(panelList);
       $('#panelTable').find('> tbody > tr').remove();
 
       for (var i = 0; i < panelList.length; i++) {
@@ -126,10 +145,6 @@
           }
       }
   });
-
-
-  socket.emit('retrievePanelList', 0, false);//panel listesini getirir
-
 
   socket.on('retrievePanelData', function (panelData) {
       if (selectedPanelId == null) return false;

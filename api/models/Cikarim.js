@@ -8,11 +8,15 @@ module.exports = {
     date: {
       type: 'date',
       defaultsTo: 'true'
+    },
+    url: {
+      type: 'string',
+      defaultsTo: 'true'
     }
   },
 
   new: function(inputs, cb){
-    Panel.create({
+    Cikarim.create({
       cikarim: inputs.cikarim,
       date: inputs.date,
     })

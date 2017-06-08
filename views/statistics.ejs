@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Güneş Paneli Gözlem Sistemi</title>
+    <link rel="stylesheet" href="/js/stylesheets/style.css">
+    <link rel="stylesheet" href="/js/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/js/jquery-ui-1.11.4/jquery-ui.min.css">
+
+    <script src="/js/socket.io.js"></script>
+    <script src="/js/moment.min.js"></script>
+    <script src="/js/jquery-ui-1.11.4/external/jquery/jquery.js"></script>
+    <script src="/js/jquery-ui-1.11.4/jquery-ui.min.js"></script>
+    <script src="/js/bootstrap/js/bootstrap.min.js"></script>
+
+    <script src="/js/highstock.js"></script>
+
+    <script>
+      var socket = io();
+
+      socket.emit('retrieveStatistics', 0, true);
+
+      socket.on('showStatistics', function (cikarimList) {
+          $('#panelTable').find('> tbody > tr').remove();
+          for(var i = 0; i < cikarimList.length; i++) {
+              addPanelToTable(i, cikarimList[i]);
+          }
+      });
+
+      function addPanelToTable(index, cikarim) {
+          var row = '<tr>';
+          row += '<th scope="row" style="">' + cikarim.id + '</th>';
+          row += '<td>'+cikarim.cikarim+'</td>';
+          row += '<td>'+moment(cikarim.date).format('DD-MM-YYYY')+'</td>';
+          row += '<td>'+ "<a href="+ cikarim.url + ".info" +">Link</a>" + '</td>';
+          row += '</td>';
+          row += '</tr>';
+          $('#panelTable > tbody:last-child').append(row);
+      }
+
+    </script>
+
+
+  </head>
+    <body>
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+          <div class="navbar-header"><a href="/" class="navbar-brand">
+              Güneş Paneli Gözlem Sistemi
+              </a></div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+              <li id="viewPanel"><a href="/">Panel Takibi</a></li>
+              <li id="managePanel"><a href="manage">
+                  Panel Yönetimi
+                  </a></li>
+              <li id="statisticPanel" class="active"><a href="/statistics">İstatistikler</a></li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+    <div class="jumbotron">
+      <div style="margin-bottom:20px;" class="container">
+        <h1>İstatistik Takibi</h1>
+        <p>
+          Bu sayfada sosyal medyada paylaşılan çıkarım linklerinin istatistiklerini listeleyebilirsiniz.
+        </p>
+      </div>
+    </div>
+
+    <div class="container">
+      <div role="alert" style="display:none" class="alert alert-danger alert-dismissible">
+        <button type="button" id="alertClose" aria-label="Close" class="close"><span aria-hidden="true">&times;</span></button><strong>Uyarı!</strong><span>Panel adı boş bırakılamaz.</span>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3>İstatistikler</h3>
+        </div>
+        <table id="panelTable" class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Çıkarım</th>
+              <th>Tarih</th>
+              <th>Link</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted">
+          &copy; Kocaeli Üniversitesi Bilgisayar Mühendisliği 2017
+        </p>
+      </div>
+    </footer>
+
+  </body>
+</html>

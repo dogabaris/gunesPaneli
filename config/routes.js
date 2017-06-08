@@ -25,6 +25,7 @@ module.exports.routes = {
   // Views
   '/': { view: 'homepage' },
   '/manage': { view: 'manage' },
+  '/statistics': { view: 'statistics' },
 
   //'get /signup': { view: 'user/signup' },
   //'/welcome': { view: 'user/welcome' },
@@ -37,6 +38,7 @@ module.exports.routes = {
   '/manage': 'manageController.manageRender',
   '/webhook': 'apiController.webhook',
   '/access-token': 'apiController.accesstoken',
+  '/statistics': 'statisticController.statisticRender',
   //'post /home/new': 'UserController.new',
   //'post /home/update': 'UserController.update'
 

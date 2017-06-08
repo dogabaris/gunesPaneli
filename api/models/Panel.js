@@ -12,11 +12,17 @@ module.exports = {
       type: 'string',
       required: true
     },
-    cityCode: {
+    ipAddr: {
       type: 'string',
+      required: true
     },
-    countryCode: {
+    macAddr: {
       type: 'string',
+      required: true
+    },
+    location: {
+      type: 'string',
+      required: true
     },
     status: {
       type: 'boolean',

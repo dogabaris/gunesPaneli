@@ -101,12 +101,12 @@ manageRender:function (req, res) {
 
         socket.on('addPanel', function(data) {
 
-          Panel.new({
+          Panel.create({
             name: data.name,
-            cityCode: data.cityCode,
-            status: data.status,
-            countryCode: data.countryCode,
-            status: data.status,  //ekleyen kullanıcının id'si
+            //cityCode: data.cityCode,
+            //status: data.status,
+            //countryCode: data.countryCode,
+            status: true,
           }, function (err, newPanelData) {
                 if(err)
                   console.log(err);
@@ -116,7 +116,7 @@ manageRender:function (req, res) {
 
         });
 
-        socket.on('addPanel2', function(panel) {
+        /*socket.on('addPanel2', function(panel) {
             var newPanel = new Panel(panel);
 
 
@@ -129,21 +129,36 @@ manageRender:function (req, res) {
 
                 sendPanelList();
             });
-        });
+        });*/
 
         socket.on('editPanel', function(panel) {
             //console.log(panel);
 
+            Panel.find({_id:panel._id}).remove(function(err){
+                if(err) {
+                    console.error(err);
+                } else {
+                    PanelData.find({panelId:panel._id}).remove(function(err){
+                        if(err) {
+                            console.error(err);
+                        }
+                    });
 
-            Panel.findById(panel._id, function(err, p){
+                    manager.emit('managePanel', panel);
+                }
+
+                sendPanelList();
+            });
+
+            /*Panel.findById(panel._id, function(err, p){
                 if(err) {
                     console.error(err);
                 } else {
                     p.name      = panel.name;
-                    p.status    = panel.status;
-                    p.macAddr   = panel.macAddr;
-                    p.location  = panel.location;
-                    p.ipAddr    = '-';
+                    //p.status    = panel.status;
+                    //p.macAddr   = panel.macAddr;
+                    //p.location  = panel.location;
+                    //p.ipAddr    = '-';
 
                     p.save(function(err){
                         if(err) {
@@ -155,7 +170,7 @@ manageRender:function (req, res) {
                         sendPanelList();
                     });
                 }
-            });
+            });*/
         });
 
         socket.on('removePanel', function(panel) {
@@ -200,6 +215,7 @@ manageRender:function (req, res) {
                 }
 
                 io.emit('retrievePanelList', !err ? panels : []);
+                console.log(panels);
 
                 if(addToManager) {
                     manager.emit('setPanelMap', !err ? panels : []);
@@ -241,7 +257,7 @@ manageRender:function (req, res) {
         });
 
 
-        socket.on('ipAdresiGuncelle',function(panel){
+        /*socket.on('ipAdresiGuncelle',function(panel){
             Panel.findOne({macAddr: panel.macAddr}, function(err, res){
                 if(err) {
                     console.error(err);
@@ -258,7 +274,7 @@ manageRender:function (req, res) {
                     });
                 }
             });
-        });
+        });*/
 
         /*PanelData.find().groupBy({{
                                   _id: {
@@ -274,9 +290,6 @@ manageRender:function (req, res) {
 
                                 io.emit('allShowDataListen', ret);
                               });*/
-
-
-
 
 
         socket.on('allDataShow', function(panel){

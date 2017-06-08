@@ -35,7 +35,7 @@ module.exports = {
                 console.error(err);
             }
 
-            console.log(paneldatas);
+            //console.log(paneldatas);
 
             io.emit('showAnlikBaslangic', !err ? paneldatas : []);
 
@@ -82,7 +82,7 @@ module.exports = {
 
             PanelData.find({panelId: panelId}).sort('date DESC').limit(1).where({ "date" : { ">=" : now, "<" : tomorrow }})
             .exec(function (err, paneldatas) {
-              console.log(paneldatas);
+              //console.log(paneldatas);
 
               io.emit('showAnlik', !err ? paneldatas : []);
             });

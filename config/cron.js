@@ -1,8 +1,8 @@
 module.exports.cron = {
 
   VeriUret: {
-    schedule: '*/30 * * * * *', //her 10 sn'de bir çalışır.
-    //schedule: '00 36 21 * * *', //her gün saat 10:00:00'da yapay zeka scripti çalıştırılarak sonuç üretilir ve apilere yollanır.
+    //schedule: '*/30 * * * * *', //her 10 sn'de bir çalışır.
+    schedule: '00 00 01 * * *', //her gün saat 10:00:00'da yapay zeka scripti çalıştırılarak sonuç üretilir ve apilere yollanır.
     onTick: function () {
       console.log("tick");
       var fs = require('fs');
@@ -17,7 +17,7 @@ module.exports.cron = {
         access_token_secret: 'j5scoCfEy4IsEu0XUH5T2CvLjWrB7wJQR2zMv4E2xVh29'
       });
       var token = "EAACl9XZC0IeYBALzrIycNGBUZAP4qwuTVzQ0MAgCU1gTOtD8ihQZAESTj8JRz7sfTn453ZBZBpaHTAzg6GbhXZANHfwVGZAqV70e022v8kZAZBDdL6YrGijlZAbYQf1fvAl2ZBuu4zR7jc8JHVOCezHifDTelZAlYKUVs7AZD"
-      //longlivetoken
+      //long-livedtoken
 
       if (fs.existsSync('k-means.R')) {
           var sys = require('sys')

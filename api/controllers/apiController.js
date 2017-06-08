@@ -7,7 +7,8 @@ module.exports = {
   			res.send('Invalid verify token');
   	}
   },
+
   accesstoken:function(req, res){//twitter token
-    
+
   },
 }
