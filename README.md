@@ -29,10 +29,10 @@ sudo mongod
 örnek veritabanını mongodb'ye aktarmak için (gunesPaneli'nin indirildiği klasör)/db/stringDatabase yolu kullanılarak açılan terminalde 
 
 ```
-mongorestore -d GunesPaneli2 -c paneldata paneldata.json
+mongorestore -d GunesPaneli5 -c paneldata paneldata.json
 ```
 ```
-mongorestore -d GunesPaneli2 -c panel panel.json
+mongorestore -d GunesPaneli5 -c panel panel.json
 ```
 
 komutları girilmelidir.
