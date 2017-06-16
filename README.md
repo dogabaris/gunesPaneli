@@ -12,7 +12,7 @@
 
 ![İstatistik Paneli](https://github.com/dogabaris/gunesPaneli/blob/master/istatistik.jpg)
 
-Mongodb GunOzetleri2 ismiyle kullanılıyor.
+Mongodb GunOzetleri5 ismiyle kullanılıyor.
 
 node paketlerini indirmek için proje dizininde açılan terminale aşağıdaki kod girilmelidir.
 
