@@ -1,5 +1,17 @@
 # gunesPaneli
 
+### Gözlem Paneli
+
+![Gözlem Paneli](https://github.com/dogabaris/gunesPaneli/blob/master/gunluk.jpg)
+
+### Panel Yönetimi
+
+![Panel Yönetimi](https://github.com/dogabaris/gunesPaneli/blob/master/panelyonetimi.jpg)
+
+### İstatistik Paneli
+
+![İstatistik Paneli](https://github.com/dogabaris/gunesPaneli/blob/master/istatistik.jpg)
+
 Mongodb GunOzetleri2 ismiyle kullanılıyor.
 
 node paketlerini indirmek için proje dizininde açılan terminale aşağıdaki kod girilmelidir.
