@@ -1,0 +1,5 @@
+{"_id":{"$oid":"56eb3d747c727d861b3278ed"},"name":"İzmit","status":true,"countryCode":null,"cityCode":null,"coordinates":[],"__v":0}
+{"_id":{"$oid":"56eb3d5d7c727d861b3278ec"},"name":"Umuttepe","status":true,"countryCode":null,"cityCode":null,"coordinates":[],"__v":0}
+{"_id":{"$oid":"56eb3d7b7c727d861b3278ee"},"name":"Derince","status":true,"countryCode":null,"cityCode":null,"coordinates":[],"__v":0}
+{"_id":{"$oid":"56eb3d8d7c727d861b3278f0"},"name":"Gebze","status":true,"countryCode":null,"cityCode":null,"coordinates":[],"__v":0}
+{"_id":{"$oid":"56eb40487580abd81cca2c7d"},"name":"Darıca","status":true,"countryCode":null,"cityCode":null,"coordinates":[],"__v":0}
