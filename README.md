@@ -48,3 +48,5 @@ proje
 http://localhost:1337
 
 dizininde çalışıyor olacaktır.
+
+Güneş Paneli Gözlem Sistemi, Kocaeli Üniversitesi 2017 yılı Bilgisayar Mühendisliği bitirme tezi uygulaması olarak oluşturulmuştur. https://github.com/cebbus/nodejs-solar-panel projesini temel alarak geliştirilmiştir. 
